@@ -1,12 +1,20 @@
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
+# Public Transport Victoria
 
 The `public transport victoria` sensor platform uses the [Public Transport Victoria (PTV)](https://www.ptv.vic.gov.au/) as a source for public transport departure times for Victoria, Australia.
+
+## About this fork
+
+This is a development fork of [bremor/public_transport_victoria](https://github.com/bremor/public_transport_victoria). The aim is to add general, structured route alerts and disruption notices while preserving existing configurations and departure entities, then contribute the feature back upstream.
+
+The planned work includes current and planned notices across transport modes, alert polling independent of departures, and regression tests. These features are still in development; see the [development backlog](https://github.com/davidbmck/public_transport_victoria/issues/1) for progress.
+
+This fork is unlikely to become a long-term maintained alternative to the original integration. The intention is to use it for development and testing, then return to upstream if the changes are accepted. That may change, but there is no commitment to ongoing maintenance or regular releases. Credit for the original integration remains with its upstream authors and contributors.
 
 ## Installation (There are two methods, with HACS or manual)
 
 [![hacs][hacsbadge]][hacs]
 
-Install via HACS (default store) or install manually by copying the files in a new 'custom_components/public_transport_victoria' directory.
+This fork is not in the HACS default store. To install it through HACS, add `https://github.com/davidbmck/public_transport_victoria` as a [custom repository](https://www.hacs.xyz/docs/faq/custom_repositories/) with type **Integration**. For manual installation, copy `custom_components/public_transport_victoria` into your Home Assistant configuration directory.
 
 ## Prerequisites
 
@@ -22,7 +30,7 @@ After you have installed the custom component (see above):
 
 ## Notes
 This integration will refresh data every 10 minutes. If you wish to update the departure information more frequently during interesting periods, you may use an automation like the one below. It will update the sensors every minute between 7:30AM-8:30AM and 4:45PM-5:45PM.
-```
+```yaml
 automation:
 
   - alias: 'update_trains'
@@ -51,7 +59,5 @@ automation:
             - 'sensor.werribee_line_to_city_flinders_street_from_aircraft_station_4'
 ```
 
-<a href="https://www.buymeacoffee.com/bremor" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height=40px width=144px></a>
-
 [hacs]: https://hacs.xyz
-[hacsbadge]: https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge
+[hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge
