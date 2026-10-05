@@ -1,0 +1,15 @@
+# Only the public integration, tests and their tool configuration enter the image.
+*
+!Dockerfile.test
+!requirements-build.txt
+!requirements-test.txt
+!pyproject.toml
+!custom_components/
+!custom_components/public_transport_victoria/
+!custom_components/public_transport_victoria/**
+!tests/
+!tests/**
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+**/.ruff_cache/

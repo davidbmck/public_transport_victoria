@@ -1,0 +1,4 @@
+# Development only; the plugin pins Home Assistant 2026.9.4 and pytest.
+-r requirements-build.in
+pytest-homeassistant-custom-component==0.13.367
+ruff==0.16.10

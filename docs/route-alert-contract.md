@@ -219,7 +219,8 @@ The [fixture catalogue](../tests/fixtures/route_alerts/README.md) and
 [case expectations](../tests/fixtures/route_alerts/cases.json) provide synthetic
 payloads, fixed clocks, expected counts/order, duplicate choices and failure
 cases. They contain no live responses, credentials, signatures or household
-data. Implement the behavioural harness in #6 before relying on these as tests.
+data. Extend the [#6 harness](development.md) alongside #3–#5 to test the actual
+alert implementation; the fixture catalogue alone is not behavioural coverage.
 
 Beyond fixture parsing, #6 must exercise existing-entry upgrades and departure
 identity preservation; two entries on one route; zero departures; independent
