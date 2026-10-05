@@ -119,8 +119,8 @@ upstream issues, comments or PRs unless the task authorises that contribution.
 
 ## Development and production boundaries
 
-The development checkout is `/home/mckechnie/projects/public_transport_victoria`.
-The live Home Assistant configuration is separate production infrastructure.
+Keep development checkouts and disposable test environments separate from live
+Home Assistant installations. Run repository commands from the checkout root.
 
 - Develop and test in this checkout or a disposable Home Assistant environment.
 - Do not copy private configuration, `.storage`, registries, databases, tokens or
@@ -130,8 +130,8 @@ The live Home Assistant configuration is separate production infrastructure.
   Production deployment requires an explicit task instruction.
 - For an authorised deployment, inspect current state first, use supported Home
   Assistant interfaces, make the smallest change and verify application behaviour.
-- Preserve the current integration source and local alert patch for rollback until
-  any replacement has been verified. A successful install alone is insufficient.
+- Preserve the deployed integration source and configuration for rollback until
+  a replacement has been verified. A successful install alone is insufficient.
 
 ### Test container lifecycle
 
@@ -158,6 +158,8 @@ volume pruning or removal of unrelated containers/images to tidy up. If cleanup
 fails, report the exact remaining resource and recovery command. Document the
 Docker engine used, source checkout, image/base version, runtime network/mount
 settings, commands run and final cleanup state in the task output.
+Keep machine-specific paths, hostnames and infrastructure details out of committed
+documentation; describe contributor workflows using repository-relative paths.
 
 ## Releases and upstream contributions
 

@@ -30,7 +30,7 @@ uses `--network none`, so tests cannot reach live APIs or a production HA servic
 
 ## Run and clean up
 
-From `/home/mckechnie/projects/public_transport_victoria`, run:
+From the repository root, run:
 
 ```sh
 sh scripts/test-container.sh
@@ -42,10 +42,9 @@ They cover failed listings, remaining resources, confirmed absence and preservin
 the original test failure status.
 
 The script builds on the Docker engine selected by the current Docker context.
-On the development server this is the local `default` context at
-`unix:///var/run/docker.sock`; the container is instantiated on that engine,
-not in the production Home Assistant installation. Confirm the context with
-`docker context show` before running on another machine.
+Confirm the selected context with `docker context show` before running; use an
+engine suitable for disposable development tests and keep it separate from live
+Home Assistant configuration.
 
 The build copies only the public integration, test files and tool configuration
 from this checkout into `/workspace` inside the image; `.dockerignore` is an
