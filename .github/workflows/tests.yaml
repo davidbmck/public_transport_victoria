@@ -14,5 +14,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: Check cleanup failure handling without Docker
+        run: python3 scripts/test-container-cleanup.py
       - name: Run pinned Home Assistant tests and clean up
         run: sh scripts/test-container.sh

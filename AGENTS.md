@@ -143,36 +143,13 @@ Never leave one running at the end of a task.
 
 Run `sh scripts/test-container.sh` for the shared local/CI checks and automatic
 cleanup. Prefer a dedicated temporary builder so its build cache can be removed
-without touching other projects. Run the following in a subshell from the repository root;
-the exit trap cleans up after success, failure or interruption:
+without touching other projects. The script installs exit and interruption traps,
+then verifies absence using successful container, image and builder listings.
+A Docker connection or listing failure is unverified cleanup and must return a
+nonzero status with the exact task resource names and recovery commands.
 
 ```sh
-(
-  set -eu
-  PTV_TEST_SUFFIX="$(git rev-parse --short HEAD)-$$"
-  PTV_TEST_IMAGE="ptv-test-harness:$PTV_TEST_SUFFIX"
-  PTV_TEST_CONTAINER="ptv-tests-$PTV_TEST_SUFFIX"
-  PTV_TEST_BUILDER="ptv-tests-$PTV_TEST_SUFFIX"
-
-  cleanup_ptv_tests() {
-    docker rm -f "$PTV_TEST_CONTAINER" 2>/dev/null || true
-    docker image rm "$PTV_TEST_IMAGE" 2>/dev/null || true
-    docker buildx rm "$PTV_TEST_BUILDER" 2>/dev/null || true
-  }
-  trap cleanup_ptv_tests EXIT
-  trap 'exit 130' INT
-  trap 'exit 143' TERM
-
-  docker buildx create --name "$PTV_TEST_BUILDER" --driver docker-container
-  docker buildx build --builder "$PTV_TEST_BUILDER" --load \
-    -f Dockerfile.test -t "$PTV_TEST_IMAGE" .
-  docker run --rm --name "$PTV_TEST_CONTAINER" --network none --read-only \
-    --tmpfs /tmp:rw,mode=1777,size=512m "$PTV_TEST_IMAGE"
-  docker run --rm --name "$PTV_TEST_CONTAINER" --network none --read-only \
-    --tmpfs /tmp:rw,mode=1777,size=512m "$PTV_TEST_IMAGE" python -m ruff check tests
-  docker run --rm --name "$PTV_TEST_CONTAINER" --network none --read-only \
-    --tmpfs /tmp:rw,mode=1777,size=512m "$PTV_TEST_IMAGE" python -m ruff format --check tests
-)
+sh scripts/test-container.sh
 ```
 
 After cleanup, verify the named container, image and builder are absent. Remove

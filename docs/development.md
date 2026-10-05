@@ -36,6 +36,11 @@ From `/home/mckechnie/projects/public_transport_victoria`, run:
 sh scripts/test-container.sh
 ```
 
+Cleanup error handling can be checked without Docker using
+`python3 scripts/test-container-cleanup.py`; CI runs these checks before building.
+They cover failed listings, remaining resources, confirmed absence and preserving
+the original test failure status.
+
 The script builds on the Docker engine selected by the current Docker context.
 On the development server this is the local `default` context at
 `unix:///var/run/docker.sock`; the container is instantiated on that engine,
@@ -54,7 +59,9 @@ The script creates a uniquely named builder, image and container using the Git
 revision and process ID. It runs Ruff lint/format checks and pytest in foreground
 containers with `--rm`, then an exit trap removes the task image and dedicated
 builder/cache even when a check fails. It verifies that those named resources
-are absent. Base/tool images may remain in Docker's shared cache; do not prune
+are absent using successful resource listings. If Docker cannot list resources,
+cleanup is reported as unverified, the script exits nonzero and prints exact
+recovery commands. Base/tool images may remain in Docker's shared cache; do not prune
 global images, builders or volumes to remove them.
 
 For interrupted work, use the exact names printed by the build or recorded for
