@@ -71,17 +71,13 @@ async def test_departure_dst_conversion(hass, utc, local):
     assert ptv_api.convert_utc_to_local(utc, hass) == local
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "Inherited build_URL logs signed URLs; "
-        "#6 remains open until safe logging is implemented."
-    ),
-)
 def test_signed_url_not_logged(caplog):
-    """Expose the existing credential-bearing URL leak with a real assertion."""
+    """Signing still works without exposing authentication data in logs."""
     caplog.set_level(logging.DEBUG)
-    ptv_api.build_URL("12345", "synthetic-test-key-not-a-credential", "/v3/route_types")
+    url = ptv_api.build_URL(
+        "12345", "synthetic-test-key-not-a-credential", "/v3/route_types"
+    )
+    assert "devid=12345" in url
+    assert "signature=" in url
     assert "signature=" not in caplog.text
     assert "devid=" not in caplog.text

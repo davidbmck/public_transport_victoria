@@ -3,7 +3,6 @@ import aiohttp
 import asyncio
 import datetime
 import hmac
-import logging
 from hashlib import sha1
 
 from homeassistant.util import Throttle
@@ -18,8 +17,6 @@ MAX_RESULTS = 5
 ROUTE_TYPES_PATH = "/v3/route_types"
 ROUTES_PATH = "/v3/routes?route_types={}"
 STOPS_PATH = "/v3/stops/route/{}/route_type/{}"
-
-_LOGGER = logging.getLogger(__name__)
 
 class Connector:
     """Public Transport Victoria connector."""
@@ -58,7 +55,6 @@ class Connector:
 
         if response is not None and response.status == 200:
             response = await response.json()
-            _LOGGER.debug(response)
             route_types = {}
             for r in response["route_types"]:
                 route_types[str(r["route_type"])] = r["route_type_name"]
@@ -123,7 +119,6 @@ class Connector:
 
         if response is not None and response.status == 200:
             response = await response.json()
-            _LOGGER.debug(response)
             directions = {}
             for r in response["directions"]:
                 directions[str(r["direction_id"])] = r["direction_name"]
@@ -141,7 +136,6 @@ class Connector:
 
         if response is not None and response.status == 200:
             response = await response.json()
-            _LOGGER.debug(response)
             stops = {}
             for r in response["stops"]:
                 stops[str(r["stop_id"])] = r["stop_name"]
@@ -160,7 +154,6 @@ class Connector:
 
         if response is not None and response.status == 200:
             response = await response.json()
-            _LOGGER.debug(response)
             departures = response["departures"]
 
             run_infos = await asyncio.gather(
@@ -180,8 +173,6 @@ class Connector:
                 r["is_express"] = run_info.get("express_stop_count", 0) > 0 if run_info else False
                 self.departures.append(r)
 
-        for departure in self.departures:
-            _LOGGER.debug(departure)
 
     async def async_run(self, run_id):
         """Get run information from Public Transport Victoria API."""
@@ -192,7 +183,6 @@ class Connector:
 
         if response is not None and response.status == 200:
             response = await response.json()
-            _LOGGER.debug(response)
             if response.get("runs") and len(response["runs"]) > 0:
                 return response["runs"][0]
         return None
@@ -203,7 +193,6 @@ def build_URL(id, api_key, request):
     hashed = hmac.new(api_key.encode('utf-8'), raw.encode('utf-8'), sha1)
     signature = hashed.hexdigest()
     url = BASE_URL + raw + '&signature={}'.format(signature)
-    _LOGGER.debug(url)
     return url
 
 def convert_utc_to_local(utc, hass):

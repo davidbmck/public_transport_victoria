@@ -13,6 +13,8 @@ from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 from custom_components.public_transport_victoria.const import ATTRIBUTION, DOMAIN
 
+from .conftest import SYNTHETIC_API_KEY
+
 DEPARTURE_PATH = "/v3/departures/route_type/0/stop/8001/route/9001"
 ENTITY_PREFIX = "sensor.example_metro_line_to_example_city_from_example_station"
 
@@ -231,6 +233,7 @@ async def test_ten_minute_departure_polling(
     assert aioclient_mock.call_count == initial_requests + 3
 
 
+@pytest.mark.parametrize("error_type", [ClientConnectionError, ValueError])
 async def test_departure_failure_and_recovery(
     hass,
     config_entry_factory,
@@ -238,6 +241,8 @@ async def test_departure_failure_and_recovery(
     aioclient_mock,
     ptv_responses,
     freezer,
+    error_type,
+    caplog,
 ):
     """Actual coordinator failure marks departures unavailable until recovery."""
     await setup_entry(hass, config_entry_factory())
@@ -253,11 +258,36 @@ async def test_departure_failure_and_recovery(
         await hass.async_block_till_done()
 
     aioclient_mock.clear_requests()
-    ptv_responses(DEPARTURE_PATH, exc=ClientConnectionError("synthetic failure"))
+    sensitive = f"{SYNTHETIC_API_KEY} ?devid=12345&signature=synthetic-signature"
+    ptv_responses(DEPARTURE_PATH, exc=error_type(sensitive))
     await refresh()
     assert hass.states.get(entity_id).state == STATE_UNAVAILABLE
+    assert f"PTV departure refresh failed ({error_type.__name__})" in caplog.text
 
     aioclient_mock.clear_requests()
     departure_responses()
     await refresh()
     assert hass.states.get(entity_id).state == previous_state
+
+
+@pytest.mark.parametrize(
+    ("error_type", "expected_state"),
+    [
+        (ClientConnectionError, ConfigEntryState.SETUP_ERROR),
+        (ValueError, ConfigEntryState.SETUP_ERROR),
+        (TimeoutError, ConfigEntryState.SETUP_RETRY),
+    ],
+)
+async def test_initial_setup_failure_is_safe(
+    hass, config_entry_factory, ptv_responses, error_type, expected_state, caplog
+):
+    """Initial requests fail before coordinator creation and must also be safe."""
+    sensitive = f"{SYNTHETIC_API_KEY} ?devid=12345&signature=synthetic-signature"
+    ptv_responses(DEPARTURE_PATH, exc=error_type(sensitive))
+    entry = config_entry_factory()
+    entry.add_to_hass(hass)
+    assert not await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    assert entry.state is expected_state
+    assert entry.entry_id not in hass.data[DOMAIN]
+    assert f"PTV entry setup failed ({error_type.__name__})" in caplog.text
