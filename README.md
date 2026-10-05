@@ -8,6 +8,8 @@ This is a development fork of [bremor/public_transport_victoria](https://github.
 
 The planned work includes current and planned notices across transport modes, alert polling independent of departures, and regression tests. These features are still in development; see the [development backlog](https://github.com/davidbmck/public_transport_victoria/issues/1) for progress.
 
+The [route alert contract](docs/route-alert-contract.md) defines the planned sensor behaviour and [synthetic response fixtures](tests/fixtures/route_alerts/README.md). It is a development specification; alert sensors are not implemented yet.
+
 This fork is unlikely to become a long-term maintained alternative to the original integration. The intention is to use it for development and testing, then return to upstream if the changes are accepted. That may change, but there is no commitment to ongoing maintenance or regular releases. Credit for the original integration remains with its upstream authors and contributors.
 
 ## Installation (There are two methods, with HACS or manual)

@@ -1,0 +1,136 @@
+{
+  "disruptions": {
+    "regional_train": [
+      {
+        "disruption_id": 301,
+        "title": "Older duplicate",
+        "last_updated": "2026-10-02T00:00:00Z",
+        "published_on": "2026-10-01T00:00:00Z",
+        "description": "Old description",
+        "to_date": null,
+        "routes": [
+          {
+            "route_id": 9001
+          }
+        ]
+      },
+      {
+        "disruption_id": 302,
+        "title": "Alpha tie",
+        "last_updated": "bad",
+        "published_on": "2026-10-01T00:00:00Z"
+      },
+      {
+        "disruption_id": 303,
+        "title": "Older unexpired variant",
+        "last_updated": "2026-10-01T00:00:00Z",
+        "to_date": null
+      },
+      {
+        "disruption_id": 304,
+        "title": "Earlier publication",
+        "last_updated": "bad",
+        "published_on": "2026-10-01T00:00:00Z"
+      },
+      {
+        "disruption_id": 305,
+        "title": "Unknown update loses",
+        "last_updated": "bad",
+        "published_on": "2026-10-04T00:00:00Z"
+      },
+      {
+        "title": "Anonymous A",
+        "description": "Synthetic missing-ID notice"
+      },
+      {
+        "disruption_id": 0,
+        "title": "Zero ID",
+        "routes": null,
+        "stops": null
+      },
+      {
+        "disruption_id": -1,
+        "title": "Older negative ID",
+        "last_updated": "2026-10-01T00:00:00Z"
+      }
+    ],
+    "general": [
+      {
+        "disruption_id": 301,
+        "title": "Updated duplicate",
+        "last_updated": "2026-10-03T11:00:00+11:00",
+        "published_on": "2026-10-01T00:00:00Z",
+        "description": "Updated description",
+        "to_date": null,
+        "routes": [
+          {
+            "route_id": 9001,
+            "direction": {
+              "direction_id": 2,
+              "direction_name": "Other example terminus",
+              "service_time": null
+            }
+          }
+        ],
+        "stops": [
+          {
+            "stop_id": 8001,
+            "stop_name": "Other example stop"
+          }
+        ]
+      },
+      {
+        "disruption_id": 302,
+        "title": "Zulu tie",
+        "last_updated": "bad",
+        "published_on": "2026-10-01T00:00:00Z"
+      },
+      {
+        "disruption_id": 303,
+        "title": "Latest expired variant",
+        "last_updated": "2026-10-04T00:00:00Z",
+        "to_date": "2026-10-04T23:00:00Z"
+      },
+      {
+        "disruption_id": 304,
+        "title": "Later publication",
+        "published_on": "2026-10-03T00:00:00Z"
+      },
+      {
+        "disruption_id": 305,
+        "title": "Valid update wins",
+        "last_updated": "2020-01-01T00:00:00Z"
+      },
+      {
+        "title": "Anonymous A",
+        "description": "Synthetic missing-ID notice"
+      },
+      {
+        "title": "Anonymous A",
+        "description": "Different synthetic notice with the same title"
+      },
+      {
+        "disruption_id": null,
+        "title": "Null ID"
+      },
+      {
+        "disruption_id": true,
+        "title": "Boolean ID"
+      },
+      {
+        "disruption_id": "301",
+        "title": "String ID"
+      },
+      {
+        "disruption_id": -1,
+        "title": "Updated negative ID",
+        "last_updated": "2026-10-04T00:00:00Z"
+      },
+      {}
+    ]
+  },
+  "status": {
+    "version": "3.0",
+    "health": 1
+  }
+}

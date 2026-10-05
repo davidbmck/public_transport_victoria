@@ -1,0 +1,22 @@
+{
+  "disruptions": {
+    "general": [],
+    "metro_train": [],
+    "metro_tram": [],
+    "metro_bus": [],
+    "regional_train": [],
+    "regional_coach": [],
+    "regional_bus": [],
+    "school_bus": [],
+    "telebus": [],
+    "night_bus": [],
+    "ferry": [],
+    "interstate_train": [],
+    "skybus": [],
+    "taxi": []
+  },
+  "status": {
+    "version": "3.0",
+    "health": 1
+  }
+}

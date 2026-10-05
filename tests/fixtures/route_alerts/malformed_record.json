@@ -1,0 +1,15 @@
+{
+  "disruptions": {
+    "general": [
+      {
+        "disruption_id": 999,
+        "title": "Usable notice"
+      },
+      null
+    ]
+  },
+  "status": {
+    "version": "3.0",
+    "health": 1
+  }
+}
