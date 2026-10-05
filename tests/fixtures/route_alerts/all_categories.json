@@ -1,0 +1,452 @@
+{
+  "disruptions": {
+    "general": [
+      {
+        "disruption_id": 100,
+        "title": "General passenger information",
+        "description": "Synthetic passenger notice; consult the operator for details.",
+        "url": "https://example.invalid/notices/100",
+        "disruption_status": "Current",
+        "disruption_type": "General notice",
+        "published_on": "2026-10-01T00:00:00Z",
+        "last_updated": "2026-10-04T00:00:00Z",
+        "from_date": "2026-10-01T00:00:00Z",
+        "to_date": "2026-10-08T00:00:00Z",
+        "routes": [],
+        "stops": []
+      }
+    ],
+    "metro_train": [
+      {
+        "disruption_id": 101,
+        "title": "Metro train works",
+        "description": "Synthetic passenger notice; consult the operator for details.",
+        "url": "https://example.invalid/notices/101",
+        "disruption_status": "Current",
+        "disruption_type": "Service change",
+        "published_on": "2026-10-01T00:00:00Z",
+        "last_updated": "2026-10-04T00:00:00Z",
+        "from_date": "2026-10-01T00:00:00Z",
+        "to_date": "2026-10-08T00:00:00Z",
+        "routes": [
+          {
+            "route_type": 0,
+            "route_id": 9001,
+            "route_name": "Example metro_train route",
+            "route_number": "1",
+            "route_gtfs_id": "example-1",
+            "direction": {
+              "route_direction_id": 5001,
+              "direction_id": 1,
+              "direction_name": "Example terminus",
+              "service_time": null
+            }
+          }
+        ],
+        "stops": [
+          {
+            "stop_id": 8001,
+            "stop_name": "Example metro_train stop"
+          }
+        ]
+      }
+    ],
+    "metro_tram": [
+      {
+        "disruption_id": 102,
+        "title": "Tram service change",
+        "description": "Synthetic passenger notice; consult the operator for details.",
+        "url": "https://example.invalid/notices/102",
+        "disruption_status": "Current",
+        "disruption_type": "Service change",
+        "published_on": "2026-10-01T00:00:00Z",
+        "last_updated": "2026-10-04T00:00:00Z",
+        "from_date": "2026-10-01T00:00:00Z",
+        "to_date": "2026-10-08T00:00:00Z",
+        "routes": [
+          {
+            "route_type": 1,
+            "route_id": 9002,
+            "route_name": "Example metro_tram route",
+            "route_number": "2",
+            "route_gtfs_id": "example-2",
+            "direction": {
+              "route_direction_id": 5002,
+              "direction_id": 1,
+              "direction_name": "Example terminus",
+              "service_time": null
+            }
+          },
+          {
+            "route_type": 1,
+            "route_id": 9999,
+            "route_name": "Second example tram route",
+            "route_number": "99",
+            "direction": null
+          }
+        ],
+        "stops": [
+          {
+            "stop_id": 8002,
+            "stop_name": "Example metro_tram stop"
+          },
+          {
+            "stop_id": 8999,
+            "stop_name": "Second example stop"
+          }
+        ]
+      }
+    ],
+    "metro_bus": [
+      {
+        "disruption_id": 103,
+        "title": "Metro bus detour",
+        "description": "Synthetic passenger notice; consult the operator for details.",
+        "url": "https://example.invalid/notices/103",
+        "disruption_status": "Current",
+        "disruption_type": "Service change",
+        "published_on": "2026-10-01T00:00:00Z",
+        "last_updated": "2026-10-04T00:00:00Z",
+        "from_date": "2026-10-01T00:00:00Z",
+        "to_date": "2026-10-08T00:00:00Z",
+        "routes": [
+          {
+            "route_type": 2,
+            "route_id": 9003,
+            "route_name": "Example metro_bus route",
+            "route_number": "3",
+            "route_gtfs_id": "example-3",
+            "direction": {
+              "route_direction_id": 5003,
+              "direction_id": 1,
+              "direction_name": "Example terminus",
+              "service_time": null
+            }
+          }
+        ],
+        "stops": [
+          {
+            "stop_id": 8003,
+            "stop_name": "Example metro_bus stop"
+          }
+        ]
+      }
+    ],
+    "regional_train": [
+      {
+        "disruption_id": 104,
+        "title": "V/Line station car park works",
+        "description": "Synthetic car park closure and lift access notice; trains continue to run.",
+        "url": "https://example.invalid/notices/104",
+        "disruption_status": "Current",
+        "disruption_type": "Service change",
+        "published_on": "2026-10-01T00:00:00Z",
+        "last_updated": "2026-10-04T00:00:00Z",
+        "from_date": "2026-10-01T00:00:00Z",
+        "to_date": null,
+        "routes": [
+          {
+            "route_type": 3,
+            "route_id": 9004,
+            "route_name": "Example regional_train route",
+            "route_number": "4",
+            "route_gtfs_id": "example-4",
+            "direction": {
+              "route_direction_id": 5004,
+              "direction_id": 1,
+              "direction_name": "Example terminus",
+              "service_time": "08:30:00"
+            }
+          }
+        ],
+        "stops": [
+          {
+            "stop_id": 8004,
+            "stop_name": "Example regional_train stop"
+          }
+        ],
+        "colour": "#abcdef",
+        "display_on_board": false,
+        "display_status": false
+      }
+    ],
+    "regional_coach": [
+      {
+        "disruption_id": 105,
+        "title": "V/Line coach stop change",
+        "description": "Synthetic passenger notice; consult the operator for details.",
+        "url": "https://example.invalid/notices/105",
+        "disruption_status": "Planned",
+        "disruption_type": "Service change",
+        "published_on": "2026-10-01T00:00:00Z",
+        "last_updated": "2026-10-04T00:00:00Z",
+        "from_date": "2026-10-06T00:00:00Z",
+        "to_date": "2026-10-08T00:00:00Z",
+        "routes": [
+          {
+            "route_type": 3,
+            "route_id": 9005,
+            "route_name": "Example regional_coach route",
+            "route_number": "5",
+            "route_gtfs_id": "example-5",
+            "direction": {
+              "route_direction_id": 5005,
+              "direction_id": 1,
+              "direction_name": "Example terminus",
+              "service_time": null
+            }
+          }
+        ],
+        "stops": [
+          {
+            "stop_id": 8005,
+            "stop_name": "Example regional_coach stop"
+          }
+        ]
+      }
+    ],
+    "regional_bus": [
+      {
+        "disruption_id": 106,
+        "title": "Regional bus timetable notice",
+        "description": "Synthetic passenger notice; consult the operator for details.",
+        "url": "https://example.invalid/notices/106",
+        "disruption_status": "Current",
+        "disruption_type": "Service change",
+        "published_on": "2026-10-01T00:00:00Z",
+        "last_updated": "2026-10-04T00:00:00Z",
+        "from_date": "2026-10-01T00:00:00Z",
+        "to_date": "2026-10-08T00:00:00Z",
+        "routes": [
+          {
+            "route_type": 2,
+            "route_id": 9006,
+            "route_name": "Example regional_bus route",
+            "route_number": "6",
+            "route_gtfs_id": "example-6",
+            "direction": {
+              "route_direction_id": 5006,
+              "direction_id": 1,
+              "direction_name": "Example terminus",
+              "service_time": null
+            }
+          }
+        ],
+        "stops": [
+          {
+            "stop_id": 8006,
+            "stop_name": "Example regional_bus stop"
+          }
+        ]
+      }
+    ],
+    "school_bus": [
+      {
+        "disruption_id": 107,
+        "title": "School bus service notice",
+        "description": "Synthetic passenger notice; consult the operator for details.",
+        "url": "https://example.invalid/notices/107",
+        "disruption_status": "Current",
+        "disruption_type": "Service change",
+        "published_on": "2026-10-01T00:00:00Z",
+        "last_updated": "2026-10-04T00:00:00Z",
+        "from_date": "2026-10-01T00:00:00Z",
+        "to_date": "2026-10-08T00:00:00Z",
+        "routes": [
+          {
+            "route_type": 2,
+            "route_id": 9007,
+            "route_name": "Example school_bus route",
+            "route_number": "7",
+            "route_gtfs_id": "example-7",
+            "direction": {
+              "route_direction_id": 5007,
+              "direction_id": 1,
+              "direction_name": "Example terminus",
+              "service_time": null
+            }
+          }
+        ],
+        "stops": [
+          {
+            "stop_id": 8007,
+            "stop_name": "Example school_bus stop"
+          }
+        ]
+      }
+    ],
+    "telebus": [
+      {
+        "disruption_id": 108,
+        "title": "Telebus booking notice",
+        "description": "Synthetic passenger notice; consult the operator for details.",
+        "url": "https://example.invalid/notices/108",
+        "disruption_status": "Current",
+        "disruption_type": "Service change",
+        "published_on": "2026-10-01T00:00:00Z",
+        "last_updated": "2026-10-04T00:00:00Z",
+        "from_date": "2026-10-01T00:00:00Z",
+        "to_date": "2026-10-08T00:00:00Z",
+        "routes": [
+          {
+            "route_type": 2,
+            "route_id": 9008,
+            "route_name": "Example telebus route",
+            "route_number": "8",
+            "route_gtfs_id": "example-8",
+            "direction": {
+              "route_direction_id": 5008,
+              "direction_id": 1,
+              "direction_name": "Example terminus",
+              "service_time": null
+            }
+          }
+        ],
+        "stops": [
+          {
+            "stop_id": 8008,
+            "stop_name": "Example telebus stop"
+          }
+        ]
+      }
+    ],
+    "night_bus": [
+      {
+        "disruption_id": 109,
+        "title": "Night bus detour",
+        "description": "Synthetic passenger notice; consult the operator for details.",
+        "url": "https://example.invalid/notices/109",
+        "disruption_status": "Current",
+        "disruption_type": "Service change",
+        "published_on": "2026-10-01T00:00:00Z",
+        "last_updated": "2026-10-04T00:00:00Z",
+        "from_date": "2026-10-01T00:00:00Z",
+        "to_date": "2026-10-08T00:00:00Z",
+        "routes": [
+          {
+            "route_type": 4,
+            "route_id": 9009,
+            "route_name": "Example night_bus route",
+            "route_number": "9",
+            "route_gtfs_id": "example-9",
+            "direction": {
+              "route_direction_id": 5009,
+              "direction_id": 1,
+              "direction_name": "Example terminus",
+              "service_time": null
+            }
+          }
+        ],
+        "stops": [
+          {
+            "stop_id": 8009,
+            "stop_name": "Example night_bus stop"
+          }
+        ]
+      }
+    ],
+    "ferry": [
+      {
+        "disruption_id": 110,
+        "title": "Ferry service notice",
+        "description": "Synthetic passenger notice; consult the operator for details.",
+        "url": "https://example.invalid/notices/110",
+        "disruption_status": "Current",
+        "disruption_type": "Service change",
+        "published_on": "2026-10-01T00:00:00Z",
+        "last_updated": "2026-10-04T00:00:00Z",
+        "from_date": "2026-10-01T00:00:00Z",
+        "to_date": "2026-10-08T00:00:00Z",
+        "routes": [],
+        "stops": []
+      }
+    ],
+    "interstate_train": [
+      {
+        "disruption_id": 111,
+        "title": "Interstate train notice",
+        "description": "Synthetic passenger notice; consult the operator for details.",
+        "url": "https://example.invalid/notices/111",
+        "disruption_status": "Current",
+        "disruption_type": "Service change",
+        "published_on": "2026-10-01T00:00:00Z",
+        "last_updated": "2026-10-04T00:00:00Z",
+        "from_date": "2026-10-01T00:00:00Z",
+        "to_date": "2026-10-08T00:00:00Z",
+        "routes": [],
+        "stops": []
+      }
+    ],
+    "skybus": [
+      {
+        "disruption_id": 112,
+        "title": "SkyBus stop notice",
+        "description": "Synthetic passenger notice; consult the operator for details.",
+        "url": "https://example.invalid/notices/112",
+        "disruption_status": "Current",
+        "disruption_type": "Service change",
+        "published_on": "2026-10-01T00:00:00Z",
+        "last_updated": "2026-10-04T00:00:00Z",
+        "from_date": "2026-10-01T00:00:00Z",
+        "to_date": "2026-10-08T00:00:00Z",
+        "routes": [
+          {
+            "route_type": 2,
+            "route_id": 9012,
+            "route_name": "Example skybus route",
+            "route_number": "12",
+            "route_gtfs_id": "example-12",
+            "direction": {
+              "route_direction_id": 5012,
+              "direction_id": 1,
+              "direction_name": "Example terminus",
+              "service_time": null
+            }
+          }
+        ],
+        "stops": [
+          {
+            "stop_id": 8012,
+            "stop_name": "Example skybus stop"
+          }
+        ]
+      }
+    ],
+    "taxi": [
+      {
+        "disruption_id": 113,
+        "title": "Taxi access notice",
+        "description": "Synthetic passenger notice; consult the operator for details.",
+        "url": "https://example.invalid/notices/113",
+        "disruption_status": "Current",
+        "disruption_type": "Service change",
+        "published_on": "2026-10-01T00:00:00Z",
+        "last_updated": "2026-10-04T00:00:00Z",
+        "from_date": "2026-10-01T00:00:00Z",
+        "to_date": "2026-10-08T00:00:00Z",
+        "routes": [],
+        "stops": []
+      }
+    ],
+    "future_mode": [
+      {
+        "disruption_id": 114,
+        "title": "Future mode information",
+        "description": "Synthetic passenger notice; consult the operator for details.",
+        "url": "https://example.invalid/notices/114",
+        "disruption_status": "Current",
+        "disruption_type": "Service change",
+        "published_on": "2026-10-01T00:00:00Z",
+        "last_updated": "2026-10-04T00:00:00Z",
+        "from_date": "2026-10-01T00:00:00Z",
+        "to_date": "2026-10-08T00:00:00Z",
+        "routes": [],
+        "stops": []
+      }
+    ]
+  },
+  "status": {
+    "version": "3.0",
+    "health": 1
+  }
+}

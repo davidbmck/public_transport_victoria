@@ -1,0 +1,35 @@
+{
+  "disruptions": {
+    "general": [
+      {
+        "disruption_id": 401,
+        "title": "Spring instant before jump",
+        "to_date": "2026-10-04T01:59:59+10:00"
+      },
+      {
+        "disruption_id": 402,
+        "title": "Spring instant at jump",
+        "to_date": "2026-10-04T03:00:00+11:00"
+      },
+      {
+        "disruption_id": 403,
+        "title": "Spring instant after jump",
+        "to_date": "2026-10-04T03:00:01+11:00"
+      },
+      {
+        "disruption_id": 404,
+        "title": "Autumn first occurrence",
+        "to_date": "2026-04-05T02:30:00+11:00"
+      },
+      {
+        "disruption_id": 405,
+        "title": "Autumn second occurrence",
+        "to_date": "2026-04-05T02:30:00+10:00"
+      }
+    ]
+  },
+  "status": {
+    "version": "3.0",
+    "health": 1
+  }
+}

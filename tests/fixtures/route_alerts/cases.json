@@ -1,0 +1,349 @@
+{
+  "description": "Contract expectations for synthetic fixtures; not a test runner. Anonymous ids in the ids array are represented by null even when a malformed original id is preserved.",
+  "cases": [
+    {
+      "name": "all_categories",
+      "file": "all_categories.json",
+      "now": "2026-10-05T00:00:00Z",
+      "outcome": "success",
+      "count": 15,
+      "ids": [
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114
+      ],
+      "checks": {
+        "retained_categories": [
+          "general",
+          "metro_train",
+          "metro_tram",
+          "metro_bus",
+          "regional_train",
+          "regional_coach",
+          "regional_bus",
+          "school_bus",
+          "telebus",
+          "night_bus",
+          "ferry",
+          "interstate_train",
+          "skybus",
+          "taxi",
+          "future_mode"
+        ],
+        "metadata_notice_id": 104,
+        "multiple_routes_and_stops_notice_id": 102
+      }
+    },
+    {
+      "name": "dates_at_boundary",
+      "file": "dates.json",
+      "now": "2026-10-05T00:00:00Z",
+      "outcome": "success",
+      "count": 15,
+      "ids": [
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        210,
+        212,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220
+      ],
+      "excluded_ids": [
+        201,
+        209,
+        211,
+        213,
+        214
+      ]
+    },
+    {
+      "name": "dates_after_boundary",
+      "file": "dates.json",
+      "now": "2026-10-05T00:00:00.000002Z",
+      "outcome": "success",
+      "count": 11,
+      "ids": [
+        202,
+        204,
+        205,
+        206,
+        207,
+        208,
+        215,
+        216,
+        217,
+        218,
+        219
+      ],
+      "excluded_ids": [
+        201,
+        203,
+        209,
+        210,
+        211,
+        212,
+        213,
+        214,
+        220
+      ]
+    },
+    {
+      "name": "duplicates_and_missing",
+      "file": "duplicates_and_missing.json",
+      "now": "2026-10-05T00:00:00Z",
+      "outcome": "success",
+      "count": 12,
+      "ids": [
+        0,
+        301,
+        302,
+        304,
+        305,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "anonymous_sources_in_order": [
+        {
+          "title": "Anonymous A",
+          "description": "Different synthetic notice with the same title"
+        },
+        {
+          "title": "Anonymous A",
+          "description": "Synthetic missing-ID notice"
+        },
+        {
+          "disruption_id": "301",
+          "title": "String ID"
+        },
+        {
+          "disruption_id": -1,
+          "title": "Negative ID"
+        },
+        {
+          "disruption_id": null,
+          "title": "Null ID"
+        },
+        {
+          "disruption_id": true,
+          "title": "Boolean ID"
+        },
+        {}
+      ],
+      "excluded_ids": [
+        303
+      ],
+      "selected_titles": {
+        "301": "Updated duplicate",
+        "302": "Zulu tie",
+        "304": "Later publication",
+        "305": "Valid update wins"
+      },
+      "categories": {
+        "301": [
+          "general",
+          "regional_train"
+        ],
+        "302": [
+          "general",
+          "regional_train"
+        ],
+        "304": [
+          "general",
+          "regional_train"
+        ],
+        "305": [
+          "general",
+          "regional_train"
+        ]
+      },
+      "checks": {
+        "missing_fields_id": 0,
+        "missing_id_exact_duplicate_categories": [
+          "general",
+          "regional_train"
+        ],
+        "reverse_input_order_has_same_output": true
+      }
+    },
+    {
+      "name": "spring_dst_boundary",
+      "file": "dst_boundaries.json",
+      "now": "2026-10-03T16:00:00Z",
+      "outcome": "success",
+      "count": 2,
+      "ids": [
+        402,
+        403
+      ],
+      "excluded_ids": [
+        401,
+        404,
+        405
+      ]
+    },
+    {
+      "name": "autumn_dst_boundary",
+      "file": "dst_boundaries.json",
+      "now": "2026-04-04T16:00:00Z",
+      "outcome": "success",
+      "count": 4,
+      "ids": [
+        401,
+        402,
+        403,
+        405
+      ],
+      "excluded_ids": [
+        404
+      ]
+    },
+    {
+      "name": "empty",
+      "file": "empty.json",
+      "now": "2026-10-05T00:00:00Z",
+      "outcome": "success",
+      "count": 0,
+      "ids": []
+    },
+    {
+      "name": "empty_optional",
+      "file": "empty_optional.json",
+      "now": "2026-10-05T00:00:00Z",
+      "outcome": "success",
+      "count": 0,
+      "ids": []
+    },
+    {
+      "name": "empty_object",
+      "file": "empty_object.json",
+      "now": "2026-10-05T00:00:00Z",
+      "outcome": "success",
+      "count": 0,
+      "ids": []
+    },
+    {
+      "name": "malformed_bucket",
+      "file": "malformed_bucket.json",
+      "now": "2026-10-05T00:00:00Z",
+      "outcome": "failure",
+      "reason": "Category is an object instead of an array."
+    },
+    {
+      "name": "malformed_record",
+      "file": "malformed_record.json",
+      "now": "2026-10-05T00:00:00Z",
+      "outcome": "failure",
+      "reason": "A category includes a null notice; do not publish the usable notice as partial success."
+    },
+    {
+      "name": "missing_disruptions",
+      "file": "missing_disruptions.json",
+      "now": "2026-10-05T00:00:00Z",
+      "outcome": "failure",
+      "reason": "Required disruptions object is absent."
+    },
+    {
+      "name": "offline",
+      "file": "offline.json",
+      "now": "2026-10-05T00:00:00Z",
+      "outcome": "failure",
+      "reason": "Explicit API health is offline."
+    },
+    {
+      "name": "null_disruptions",
+      "payload": {
+        "disruptions": null
+      },
+      "now": "2026-10-05T00:00:00Z",
+      "outcome": "failure",
+      "reason": "Null disruptions is not an empty feed."
+    },
+    {
+      "name": "non_object_root",
+      "payload": [],
+      "now": "2026-10-05T00:00:00Z",
+      "outcome": "failure",
+      "reason": "Root must be an object."
+    },
+    {
+      "name": "malformed_routes",
+      "payload": {
+        "disruptions": {
+          "general": [
+            {
+              "routes": "bad"
+            }
+          ]
+        }
+      },
+      "now": "2026-10-05T00:00:00Z",
+      "outcome": "failure",
+      "reason": "Nested coverage must not be lost."
+    },
+    {
+      "name": "malformed_stops",
+      "payload": {
+        "disruptions": {
+          "general": [
+            {
+              "stops": [
+                null
+              ]
+            }
+          ]
+        }
+      },
+      "now": "2026-10-05T00:00:00Z",
+      "outcome": "failure",
+      "reason": "Stop records must be objects."
+    },
+    {
+      "name": "malformed_status",
+      "payload": {
+        "disruptions": {},
+        "status": null
+      },
+      "now": "2026-10-05T00:00:00Z",
+      "outcome": "failure",
+      "reason": "Supplied status must be an object."
+    },
+    {
+      "name": "malformed_health",
+      "payload": {
+        "disruptions": {},
+        "status": {
+          "health": true
+        }
+      },
+      "now": "2026-10-05T00:00:00Z",
+      "outcome": "failure",
+      "reason": "Boolean health is malformed."
+    }
+  ]
+}

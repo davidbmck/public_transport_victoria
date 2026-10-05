@@ -1,0 +1,115 @@
+{
+  "disruptions": {
+    "general": [
+      {
+        "disruption_id": 201,
+        "title": "Expired current notice",
+        "disruption_status": "Current",
+        "to_date": "2026-10-04T23:59:59Z"
+      },
+      {
+        "disruption_id": 202,
+        "title": "Planned future notice",
+        "disruption_status": "Planned",
+        "from_date": "2026-10-06T00:00:00Z",
+        "to_date": "2026-10-07T00:00:00Z"
+      },
+      {
+        "disruption_id": 203,
+        "title": "Exact end boundary",
+        "to_date": "2026-10-05T00:00:00Z"
+      },
+      {
+        "disruption_id": 204,
+        "title": "Malformed end",
+        "to_date": "not-a-date"
+      },
+      {
+        "disruption_id": 205,
+        "title": "Null end",
+        "to_date": null
+      },
+      {
+        "disruption_id": 206,
+        "title": "Missing end"
+      },
+      {
+        "disruption_id": 207,
+        "title": "Naive end",
+        "to_date": "2020-01-01T00:00:00"
+      },
+      {
+        "disruption_id": 208,
+        "title": "Date-only end",
+        "to_date": "2020-01-01"
+      },
+      {
+        "disruption_id": 209,
+        "title": "Offset before boundary",
+        "to_date": "2026-10-05T10:59:59+11:00"
+      },
+      {
+        "disruption_id": 210,
+        "title": "Offset at boundary",
+        "to_date": "2026-10-05T11:00:00+11:00"
+      },
+      {
+        "disruption_id": 211,
+        "title": "Fraction before boundary",
+        "to_date": "2026-10-04T23:59:59.999999Z"
+      },
+      {
+        "disruption_id": 212,
+        "title": "Fraction after boundary",
+        "to_date": "2026-10-05T00:00:00.000001Z"
+      },
+      {
+        "disruption_id": 213,
+        "title": "End before future start",
+        "from_date": "2026-10-06T00:00:00Z",
+        "to_date": "2026-10-04T00:00:00Z"
+      },
+      {
+        "disruption_id": 214,
+        "title": "Malformed start with expired end",
+        "from_date": "not-a-date",
+        "to_date": "2026-10-04T00:00:00Z"
+      },
+      {
+        "disruption_id": 215,
+        "title": "Unknown status and old publication",
+        "disruption_status": "Unrecognised",
+        "published_on": "2020-01-01T00:00:00Z"
+      },
+      {
+        "disruption_id": 216,
+        "title": "Numeric end",
+        "to_date": 123
+      },
+      {
+        "disruption_id": 217,
+        "title": "Boolean end",
+        "to_date": true
+      },
+      {
+        "disruption_id": 218,
+        "title": "Empty end",
+        "to_date": ""
+      },
+      {
+        "disruption_id": 219,
+        "title": "Invalid calendar end",
+        "to_date": "2026-02-30T00:00:00Z"
+      },
+      {
+        "disruption_id": 220,
+        "title": "Fraction at boundary",
+        "to_date": "2026-10-05T00:00:00.000000Z"
+      }
+    ]
+  },
+  "status": {
+    "version": "3.0",
+    "health": 1
+  }
+}
