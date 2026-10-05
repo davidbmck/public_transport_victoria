@@ -121,6 +121,13 @@ The inherited workflow is now accurately named `HACS validation`; it uses the
 HACS action, not hassfest, and does not post PR comments. Its actual results must
 be reported separately from the regression tests.
 
+The first harness CI run on 5 October 2026 passed the behavioural workflow
+(19 passed, two strict expected failures). HACS validation failed because the
+fork has no recognised licence and no valid repository topics; its integration
+manifest, HACS configuration and brands checks passed. Resolve the licence with
+the upstream author rather than inventing a licence for inherited code, and
+address repository topics separately before claiming HACS validation passes.
+
 Official hassfest was run against this checkout on 5 October 2026 using
 `ghcr.io/home-assistant/hassfest@sha256:39031fe75baf5566814a01f3c414764c029c54a0e1d742965d5b94a0d6120875`.
 It fails on an inherited missing manifest `iot_class` and warns that
