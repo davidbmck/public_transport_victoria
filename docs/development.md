@@ -94,13 +94,13 @@ Never restart HA, mount private configuration or operate devices to run tests.
 - New-entry config flow and reuse of credentials by a second entry, plus route
   sorting and API network-exception propagation.
 
-Two strict expected-failure tests expose inherited logging defects:
-`build_URL` logs signed URLs, and the config flow logs credential-bearing data
-at debug level. These tests make real assertions using synthetic data. They
-are not skipped placeholders: `strict=True` causes an unexpected pass to fail
-CI so the marker must be removed when the defect is fixed. Safe logging remains
-required before #6 can close; handle the inherited logging cleanup in a focused
-follow-up rather than changing integration behaviour in the harness PR.
+Logging checks are mandatory across the behavioural suite, with debug capture
+enabled and assertions that API keys and signed URL authentication parameters
+are absent. Normal setup, new/reused credentials and failure/recovery paths are
+covered. Configuration, initial setup and departure failures report exception types without
+logging exception text, raw configuration or API payloads; request exceptions can
+contain authentication data. Signing, flow error responses, setup failure states and entity availability
+remain covered. No logging tests are marked as expected failures.
 
 ## Alert coverage to add alongside implementation
 
@@ -109,7 +109,7 @@ follow-up rather than changing integration behaviour in the harness PR.
 | #3 API client | Consume every case in `tests/fixtures/route_alerts/cases.json`; check all categories, retained metadata, IDs/duplicates/order, current/planned notices, missing/malformed dates, exact boundaries and timezone independence. Mock authentication/HTTP/timeout/JSON failures and verify shared-session response consumption and bounded timeouts. |
 | #4 Alert coordinator | Zero departures; empty-feed caching; independent timetable/alert failures and recovery; concurrent request coalescing; reuse for equal routes/credentials and separation for different credentials; ownership, disabling and unload/reload. |
 | #5 Alert entities | One sensor per existing entry, stable distinct identities for two entries, count/structured attributes, availability, default enablement and registry operations, plus all existing departure regression tests. |
-| #6 completion | Remove the real logging xfails after fixing both defects; ensure no credentials/signed URLs appear in captured logs; complete the above tests before claiming route alerts are verified. |
+| #6 completion | Keep mandatory logging checks passing; complete the above tests before claiming route alerts are verified. |
 
 Use `load_json_fixture("route_alerts/<file>.json")` for fresh fixture objects.
 Do not duplicate the planned parser in tests or turn fixture counts into tests

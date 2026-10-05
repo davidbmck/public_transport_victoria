@@ -34,24 +34,26 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # Initialize self.data if it doesn't exist
         if not hasattr(self, "data"):
             self.data = {}
-        _LOGGER.debug("Initialized self.data: %s", self.data)
 
         # Check if there is already a config entry for this integration
         existing_entries = self._async_current_entries()
         if existing_entries:
             _LOGGER.debug("Existing entry found, using existing credentials.")
             entry = existing_entries[0]
-            _LOGGER.debug("Existing entry data: %s", entry.data)
 
             # Copy id and api_key to self.data so it persists across steps
             self.data[CONF_ID] = entry.data[CONF_ID]
             self.data[CONF_API_KEY] = entry.data[CONF_API_KEY]
-            _LOGGER.debug("Carried over API key and ID into self.data: %s", self.data)
 
             self.connector = Connector(
                 self.hass, entry.data[CONF_ID], entry.data[CONF_API_KEY]
             )
-            self.route_types = await self.connector.async_route_types()
+            try:
+                self.route_types = await self.connector.async_route_types()
+            except Exception as err:
+                raise exceptions.HomeAssistantError(
+                    f"PTV configuration request failed ({type(err).__name__})"
+                ) from None
             return await self.async_step_route_types()
 
         # If no existing entry, prompt user for API key and ID
@@ -65,7 +67,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         if user_input is not None:
             try:
-                _LOGGER.debug("Received user input: %s", user_input)
                 # Initialize connector to validate API key and fetch route types
                 self.connector = Connector(
                     self.hass, user_input[CONF_ID], user_input[CONF_API_KEY]
@@ -78,15 +79,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 # Store the API key and ID in self.data for use in subsequent steps
                 self.data[CONF_ID] = user_input[CONF_ID]
                 self.data[CONF_API_KEY] = user_input[CONF_API_KEY]
-                _LOGGER.debug("Stored API key and ID in self.data: %s", self.data)
 
                 return await self.async_step_route_types()
 
             except CannotConnect:
                 _LOGGER.error("Cannot connect to Public Transport Victoria API.")
                 errors["base"] = "cannot_connect"
-            except Exception:
-                _LOGGER.exception("Unexpected exception")
+            except Exception as err:
+                _LOGGER.error("PTV configuration request failed (%s)", type(err).__name__)
                 errors["base"] = "unknown"
 
         # Show the form to input the API ID and Key
@@ -114,8 +114,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             except CannotConnect:
                 errors["base"] = "cannot_connect"
-            except Exception:
-                _LOGGER.exception("Unexpected exception")
+            except Exception as err:
+                _LOGGER.error("PTV configuration request failed (%s)", type(err).__name__)
                 errors["base"] = "unknown"
 
         # If there is no user input or there were errors, show the form again.
@@ -143,8 +143,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             except CannotConnect:
                 errors["base"] = "cannot_connect"
-            except Exception:
-                _LOGGER.exception("Unexpected exception")
+            except Exception as err:
+                _LOGGER.error("PTV configuration request failed (%s)", type(err).__name__)
                 errors["base"] = "unknown"
 
         # If there is no user input or there were errors, show the form again.
@@ -172,8 +172,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             except CannotConnect:
                 errors["base"] = "cannot_connect"
-            except Exception:
-                _LOGGER.exception("Unexpected exception")
+            except Exception as err:
+                _LOGGER.error("PTV configuration request failed (%s)", type(err).__name__)
                 errors["base"] = "unknown"
 
         # If there is no user input or there were errors, show the form again.
@@ -203,8 +203,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             except CannotConnect:
                 errors["base"] = "cannot_connect"
-            except Exception:
-                _LOGGER.exception("Unexpected exception")
+            except Exception as err:
+                _LOGGER.error("PTV configuration request failed (%s)", type(err).__name__)
                 errors["base"] = "unknown"
 
         # If there is no user input or there were errors, show the form again.

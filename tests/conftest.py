@@ -1,6 +1,7 @@
 """Shared fixtures for real Home Assistant tests with synthetic PTV responses."""
 
 import json
+import logging
 import re
 from pathlib import Path
 
@@ -81,3 +82,18 @@ def ptv_responses(aioclient_mock, monkeypatch):
         )
 
     return register
+
+
+@pytest.fixture(autouse=True)
+def safe_logs(caplog):
+    """Keep authentication data out of captured logs across the suite."""
+    caplog.set_level(logging.DEBUG)
+    yield
+    formatter = logging.Formatter()
+    captured = "\n".join(
+        formatter.format(record)
+        for phase in ("setup", "call", "teardown")
+        for record in caplog.get_records(phase)
+    )
+    for sensitive in (SYNTHETIC_API_KEY, "devid=", "signature="):
+        assert sensitive not in captured

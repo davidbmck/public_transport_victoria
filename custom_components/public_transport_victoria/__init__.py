@@ -6,6 +6,7 @@ import logging
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_API_KEY, CONF_ID
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 
 from .const import (
     CONF_DIRECTION, CONF_DIRECTION_NAME, CONF_ROUTE, CONF_ROUTE_NAME,
@@ -43,7 +44,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry.data[CONF_DIRECTION_NAME],
         entry.data[CONF_STOP_NAME],
     )
-    await connector._init()
+    try:
+        await connector._init()
+    except Exception as err:
+        raise HomeAssistantError(
+            f"PTV entry setup failed ({type(err).__name__})"
+        ) from None
 
     hass.data[DOMAIN][entry.entry_id] = connector
 
