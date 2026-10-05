@@ -46,11 +46,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
     try:
         await connector._init()
-    except TimeoutError as err:
-        # Preserve HA's setup retry handling for request timeouts.
-        raise TimeoutError(
-            f"PTV entry setup failed ({type(err).__name__})"
-        ) from None
     except Exception as err:
         raise HomeAssistantError(
             f"PTV entry setup failed ({type(err).__name__})"

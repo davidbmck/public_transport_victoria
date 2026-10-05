@@ -99,7 +99,7 @@ enabled and assertions that API keys and signed URL authentication parameters
 are absent. Normal setup, new/reused credentials and failure/recovery paths are
 covered. Configuration, initial setup and departure failures report exception types without
 logging exception text, raw configuration or API payloads; request exceptions can
-contain authentication data. Signing, flow error responses, setup timeout retries and entity availability
+contain authentication data. Signing, flow error responses, setup failure states and entity availability
 remain covered. No logging tests are marked as expected failures.
 
 ## Alert coverage to add alongside implementation

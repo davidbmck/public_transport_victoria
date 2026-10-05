@@ -270,16 +270,9 @@ async def test_departure_failure_and_recovery(
     assert hass.states.get(entity_id).state == previous_state
 
 
-@pytest.mark.parametrize(
-    ("error_type", "expected_state"),
-    [
-        (ClientConnectionError, ConfigEntryState.SETUP_ERROR),
-        (ValueError, ConfigEntryState.SETUP_ERROR),
-        (TimeoutError, ConfigEntryState.SETUP_RETRY),
-    ],
-)
+@pytest.mark.parametrize("error_type", [ClientConnectionError, ValueError, TimeoutError])
 async def test_initial_setup_failure_is_safe(
-    hass, config_entry_factory, ptv_responses, error_type, expected_state, caplog
+    hass, config_entry_factory, ptv_responses, error_type, caplog
 ):
     """Initial requests fail before coordinator creation and must also be safe."""
     sensitive = f"{SYNTHETIC_API_KEY} ?devid=12345&signature=synthetic-signature"
@@ -288,6 +281,6 @@ async def test_initial_setup_failure_is_safe(
     entry.add_to_hass(hass)
     assert not await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    assert entry.state is expected_state
+    assert entry.state is ConfigEntryState.SETUP_ERROR
     assert entry.entry_id not in hass.data[DOMAIN]
     assert f"PTV entry setup failed ({error_type.__name__})" in caplog.text
