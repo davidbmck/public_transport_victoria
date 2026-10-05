@@ -1,0 +1,18 @@
+FROM python:3.14.7-slim-bookworm@sha256:82bc3c539b8813ada9d68c63b40158fa002f7f33de9bf3312a3dfdc0620dff56
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    RUFF_CACHE_DIR=/tmp/ruff-cache
+
+WORKDIR /workspace
+COPY requirements-build.txt requirements-test.txt ./
+RUN python -m pip install --no-cache-dir --require-hashes -r requirements-build.txt \
+    && python -m pip install --no-cache-dir --no-build-isolation --require-hashes -r requirements-test.txt \
+    && python -m pip check
+
+COPY pyproject.toml ./
+COPY custom_components/public_transport_victoria ./custom_components/public_transport_victoria
+COPY tests ./tests
+
+CMD ["python", "-m", "pytest", "-o", "cache_dir=/tmp/pytest-cache"]

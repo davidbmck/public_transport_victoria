@@ -1,0 +1,13 @@
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+addopts = "-q --strict-config --strict-markers --disable-socket --allow-unix-socket --timeout=30"
+
+[tool.ruff]
+target-version = "py314"
+include = ["tests/**/*.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "ASYNC"]

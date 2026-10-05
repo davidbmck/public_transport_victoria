@@ -99,11 +99,12 @@ Before opening a pull request:
 6. State exactly what was tested and what remains unverified. Do not claim that
    syntax checks or HACS metadata validation establish runtime correctness.
 
-The upstream baseline currently has no behavioural test suite. Establish the
+The upstream baseline has no behavioural test suite. Extend this fork's container
 harness under backlog issue #6; inspect the available commands rather than
 inventing test results or assuming test/release automation exists. The inherited
-workflow is named "Validate with hassfest", but currently runs the HACS action,
-not hassfest or behavioural tests.
+metadata workflow is named "HACS validation" and runs the HACS action. The separate
+"Behavioural tests" workflow runs the regression suite. Manual hassfest checks and
+remaining validation gaps are documented in `docs/development.md`.
 
 Pull requests should:
 
@@ -131,6 +132,55 @@ The live Home Assistant configuration is separate production infrastructure.
   Assistant interfaces, make the smallest change and verify application behaviour.
 - Preserve the current integration source and local alert patch for rollback until
   any replacement has been verified. A successful install alone is insufficient.
+
+### Test container lifecycle
+
+Use `Dockerfile.test` for the pinned development test environment. Build from
+this checkout; do not mount the production Home Assistant directory, Docker
+socket, devices or private configuration into the container. Test containers
+must be foreground, disposable, have no published ports and use `--network none`.
+Never leave one running at the end of a task.
+
+Run `sh scripts/test-container.sh` for the shared local/CI checks and automatic
+cleanup. Prefer a dedicated temporary builder so its build cache can be removed
+without touching other projects. Run the following in a subshell from the repository root;
+the exit trap cleans up after success, failure or interruption:
+
+```sh
+(
+  set -eu
+  PTV_TEST_SUFFIX="$(git rev-parse --short HEAD)-$$"
+  PTV_TEST_IMAGE="ptv-test-harness:$PTV_TEST_SUFFIX"
+  PTV_TEST_CONTAINER="ptv-tests-$PTV_TEST_SUFFIX"
+  PTV_TEST_BUILDER="ptv-tests-$PTV_TEST_SUFFIX"
+
+  cleanup_ptv_tests() {
+    docker rm -f "$PTV_TEST_CONTAINER" 2>/dev/null || true
+    docker image rm "$PTV_TEST_IMAGE" 2>/dev/null || true
+    docker buildx rm "$PTV_TEST_BUILDER" 2>/dev/null || true
+  }
+  trap cleanup_ptv_tests EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+
+  docker buildx create --name "$PTV_TEST_BUILDER" --driver docker-container
+  docker buildx build --builder "$PTV_TEST_BUILDER" --load \
+    -f Dockerfile.test -t "$PTV_TEST_IMAGE" .
+  docker run --rm --name "$PTV_TEST_CONTAINER" --network none --read-only \
+    --tmpfs /tmp:rw,mode=1777,size=512m "$PTV_TEST_IMAGE"
+  docker run --rm --name "$PTV_TEST_CONTAINER" --network none --read-only \
+    --tmpfs /tmp:rw,mode=1777,size=512m "$PTV_TEST_IMAGE" python -m ruff check tests
+  docker run --rm --name "$PTV_TEST_CONTAINER" --network none --read-only \
+    --tmpfs /tmp:rw,mode=1777,size=512m "$PTV_TEST_IMAGE" python -m ruff format --check tests
+)
+```
+
+After cleanup, verify the named container, image and builder are absent. Remove
+only resources created for this task; never use global `docker system prune`,
+volume pruning or removal of unrelated containers/images to tidy up. If cleanup
+fails, report the exact remaining resource and recovery command. Document the
+Docker engine used, source checkout, image/base version, runtime network/mount
+settings, commands run and final cleanup state in the task output.
 
 ## Releases and upstream contributions
 

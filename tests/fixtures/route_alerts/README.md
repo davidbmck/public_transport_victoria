@@ -2,8 +2,9 @@
 
 These examples support the [route alert contract](../../../docs/route-alert-contract.md)
 and [issue #2](https://github.com/davidbmck/public_transport_victoria/issues/2).
-They are fixture inputs and expectations, not an implemented test suite.
-Establish the harness in issue #6 and extend it alongside issues #3–#5.
+They are fixture inputs and expectations, not an implemented alert test suite.
+Use the [issue #6 harness](../../../docs/development.md) to add behavioural
+coverage alongside issues #3–#5.
 
 ## Provenance
 

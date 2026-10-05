@@ -1,0 +1,26 @@
+{
+  "departures": [
+    {
+      "run_id": 7001,
+      "route_id": 9001,
+      "stop_id": 8001,
+      "direction_id": 1,
+      "scheduled_departure_utc": "2026-10-05T00:00:00Z",
+      "estimated_departure_utc": "2026-10-05T00:05:00Z",
+      "platform_number": "1",
+      "at_platform": false,
+      "disruption_ids": [100]
+    },
+    {
+      "run_id": 7002,
+      "route_id": 9001,
+      "stop_id": 8001,
+      "direction_id": 1,
+      "scheduled_departure_utc": "2026-10-05T00:10:00Z",
+      "estimated_departure_utc": null,
+      "platform_number": "2",
+      "at_platform": false,
+      "disruption_ids": []
+    }
+  ]
+}

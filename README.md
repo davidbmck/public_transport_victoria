@@ -10,6 +10,8 @@ The planned work includes current and planned notices across transport modes, al
 
 The [route alert contract](docs/route-alert-contract.md) defines the planned sensor behaviour and [synthetic response fixtures](tests/fixtures/route_alerts/README.md). It is a development specification; alert sensors are not implemented yet.
 
+For isolated regression tests, run `sh scripts/test-container.sh` from this checkout. The [development guide](docs/development.md) explains the pinned Home Assistant container, checks, cleanup and remaining alert test work.
+
 This fork is unlikely to become a long-term maintained alternative to the original integration. The intention is to use it for development and testing, then return to upstream if the changes are accepted. That may change, but there is no commitment to ongoing maintenance or regular releases. Credit for the original integration remains with its upstream authors and contributors.
 
 ## Installation (There are two methods, with HACS or manual)
