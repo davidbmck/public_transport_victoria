@@ -115,12 +115,12 @@
       "outcome": "success",
       "count": 12,
       "ids": [
+        -1,
         0,
         301,
         302,
         304,
         305,
-        null,
         null,
         null,
         null,
@@ -142,10 +142,6 @@
           "title": "String ID"
         },
         {
-          "disruption_id": -1,
-          "title": "Negative ID"
-        },
-        {
           "disruption_id": null,
           "title": "Null ID"
         },
@@ -162,7 +158,8 @@
         "301": "Updated duplicate",
         "302": "Zulu tie",
         "304": "Later publication",
-        "305": "Valid update wins"
+        "305": "Valid update wins",
+        "-1": "Updated negative ID"
       },
       "categories": {
         "301": [
@@ -178,6 +175,10 @@
           "regional_train"
         ],
         "305": [
+          "general",
+          "regional_train"
+        ],
+        "-1": [
           "general",
           "regional_train"
         ]
@@ -344,6 +345,35 @@
       "now": "2026-10-05T00:00:00Z",
       "outcome": "failure",
       "reason": "Boolean health is malformed."
+    },
+    {
+      "name": "defensive_null_direction",
+      "payload": {
+        "disruptions": {
+          "general": [
+            {
+              "disruption_id": 501,
+              "title": "Synthetic defensive null direction",
+              "routes": [
+                {
+                  "route_id": 9001,
+                  "direction": null
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "now": "2026-10-05T00:00:00Z",
+      "outcome": "success",
+      "count": 1,
+      "ids": [
+        501
+      ],
+      "checks": {
+        "preserve_null_direction": true
+      },
+      "reason": "PTV describes direction as an optional object, not null. This case tests defensive preservation of an undocumented value."
     }
   ]
 }

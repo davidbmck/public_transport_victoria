@@ -81,8 +81,7 @@
             "route_type": 1,
             "route_id": 9999,
             "route_name": "Second example tram route",
-            "route_number": "99",
-            "direction": null
+            "route_number": "99"
           }
         ],
         "stops": [

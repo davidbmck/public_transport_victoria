@@ -22,13 +22,19 @@ integration handles the endpoint's supplied notices, not whether PTV will return
 a particular category for a live route. Malformed values and omissions are
 intentional robustness cases, not claims about observed API responses.
 
+PTV explicitly documents null `to_date` and `service_time` values despite their
+Swagger string types. The representative category fixture keeps those documented
+exceptions and omits an optional direction object when none is supplied. The
+inline `defensive_null_direction` case separately exercises an undocumented null
+direction value that the integration chooses to preserve.
+
 ## Catalogue
 
 | File | Coverage and expected behaviour |
 | --- | --- |
 | `all_categories.json` | General, metro train/tram/bus, V/Line train/coach, regional bus, school bus, telebus, night bus, ferry, interstate train, SkyBus, taxi and future mode: 15 notices. Includes planned notices, unknown ends, multiple routes/stops, nested directions and `service_time`, GTFS IDs and display metadata. Retain the V/Line parking/lift notice even with false display flags. |
 | `dates.json` | Current/planned/unknown status, future starts, old publication, expired ends, exact boundaries, offsets, fractions, null/missing/empty/malformed/naive/date-only/non-string dates and inconsistent start/end pairs. 15 notices at the fixed clock; 11 two microseconds later. |
-| `duplicates_and_missing.json` | Cross-category IDs, newer-update selection, publication ranking, canonical tie-break, newer expired update, ID `0`, missing/null/negative/string/boolean IDs, empty notice object, exact anonymous copies and distinct notices sharing a title. 12 notices; input-order reversal must not change output. |
+| `duplicates_and_missing.json` | Cross-category IDs (including a signed negative ID), newer-update selection, publication ranking, canonical tie-break, newer expired update, ID `0`, missing/null/string/boolean IDs, empty notice object, exact anonymous copies and distinct notices sharing a title. 12 notices; input-order reversal must not change output. |
 | `dst_boundaries.json` | Explicit-offset instants on Melbourne's 2026 spring jump and autumn repeated hour. Spring case retains IDs 402 and 403; autumn case retains 401, 402, 403 and 405. |
 | `empty.json` | All documented categories present as empty arrays: available with state `0` and `alerts: []`. |
 | `empty_optional.json` | Missing buckets, a null bucket and no root status: successful empty response. |
@@ -37,7 +43,7 @@ intentional robustness cases, not claims about observed API responses.
 | `malformed_record.json` | A good notice followed by a null notice: failure, never partial success. |
 | `missing_disruptions.json` | Missing required data container: failure. |
 | `offline.json` | Explicit offline API health with empty data: failure. |
-| `cases.json` | Fixed clocks and machine-readable expected results for the above files plus inline malformed payloads. |
+| `cases.json` | Fixed clocks and machine-readable expected results for the above files plus an inline defensive null-direction case and malformed payloads. |
 
 ## Consuming the expectations
 
@@ -56,6 +62,8 @@ checking counts alone is insufficient. ID `0` in the duplicate fixture has null
 coverage arrays and omitted text/date fields: normalize its arrays to `[]` and
 absent standard scalar keys to `null`. Notice ID 301's selected record must keep
 the updated description and its stop/direction metadata.
+ID `-1` is a valid signed `int64` identifier under the API schema: its newer
+cross-category record wins, it counts once, and it sorts before ID `0`.
 
 Run fixed-clock cases independently of the execution host's timezone. The
 ordinary reference instant `2026-10-05T00:00:00Z` is 11:00 AEDT in Melbourne.

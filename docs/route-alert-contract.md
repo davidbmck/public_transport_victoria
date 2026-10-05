@@ -73,9 +73,13 @@ same-named input field. Preserve complete route and stop objects, including
 `direction_id`, `direction_name`, `service_time`) where supplied. Preserve unknown
 nested fields. Do not flatten direction metadata into a guessed top-level value.
 
-An absent or `null` route `direction` remains absent or `null`; it does not mean
-the configured direction. `service_time` is the API's local AEDT/AEST clock text,
-not an absolute timestamp; retain it without converting it or inventing a date.
+PTV defines route `direction` as an optional object. An absent direction remains
+absent; it does not mean the configured direction. As a defensive policy,
+preserve a supplied `null` direction, but do not treat it as a documented API
+value. `service_time` is the API's local AEDT/AEST clock text, not an absolute
+timestamp; retain it without converting it or inventing a date. PTV explicitly
+documents `null` for `service_time` and for an unknown `to_date`, despite declaring
+both fields as strings in the Swagger schema.
 Missing text or metadata does not discard an otherwise usable notice. For
 non-array, non-null `routes` or `stops`, or non-object elements in those arrays,
 fail the response rather than silently lose coverage.
@@ -142,7 +146,9 @@ cached data and reporting a healthy count.
 
 ## Duplicate IDs and ordering
 
-A usable ID is a non-negative JSON integer, including `0`, excluding booleans.
+A usable ID is a JSON integer in PTV's signed `int64` range
+(`-9223372036854775808` through `9223372036854775807`), excluding booleans.
+Negative IDs and `0` are usable IDs; the API specifies no non-negative minimum.
 Group records with the same usable `disruption_id` across all categories. Choose
 one complete source record by these priorities, highest first:
 

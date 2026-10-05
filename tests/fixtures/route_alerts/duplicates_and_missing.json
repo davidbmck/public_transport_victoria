@@ -47,6 +47,11 @@
         "title": "Zero ID",
         "routes": null,
         "stops": null
+      },
+      {
+        "disruption_id": -1,
+        "title": "Older negative ID",
+        "last_updated": "2026-10-01T00:00:00Z"
       }
     ],
     "general": [
@@ -118,7 +123,8 @@
       },
       {
         "disruption_id": -1,
-        "title": "Negative ID"
+        "title": "Updated negative ID",
+        "last_updated": "2026-10-04T00:00:00Z"
       },
       {}
     ]
