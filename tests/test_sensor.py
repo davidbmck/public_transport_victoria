@@ -270,7 +270,9 @@ async def test_departure_failure_and_recovery(
     assert hass.states.get(entity_id).state == previous_state
 
 
-@pytest.mark.parametrize("error_type", [ClientConnectionError, ValueError, TimeoutError])
+@pytest.mark.parametrize(
+    "error_type", [ClientConnectionError, ValueError, TimeoutError]
+)
 async def test_initial_setup_failure_is_safe(
     hass, config_entry_factory, ptv_responses, error_type, caplog
 ):
