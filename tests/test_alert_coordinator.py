@@ -7,13 +7,11 @@ from unittest.mock import Mock, patch
 
 import aiohttp
 import pytest
-from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_platform import async_get_platforms
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.setup import async_setup_component
 from homeassistant.util import dt as dt_util
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
@@ -32,43 +30,14 @@ ALERT_PATH = "/v3/disruptions/route/9001"
 NOTICE = {"disruption_id": 1, "title": "Synthetic route notice", "to_date": None}
 
 
-class AlertProbe(CoordinatorEntity, SensorEntity):
-    """Test-only subscriber; the production alert sensor is work item #5."""
-
-    def __init__(self, coordinator, entry):
-        super().__init__(coordinator, context=entry.entry_id)
-        self._attr_name = f"Test alerts {entry.entry_id}"
-        self._attr_unique_id = f"test_alerts_{entry.entry_id}"
-
-    async def async_added_to_hass(self):
-        await super().async_added_to_hass()
-        await self.coordinator.async_ensure_fresh()
-
-    @property
-    def native_value(self):
-        return len(self.coordinator.data)
-
-    @property
-    def extra_state_attributes(self):
-        updated = self.coordinator.last_successful_update
-        return {
-            "alerts": self.coordinator.data,
-            "last_successful_update": updated.isoformat() if updated else None,
-        }
-
-
-async def add_probe(hass, entry):
-    """Use the actual entry's sensor platform and registry."""
-    coordinator = hass.data[DOMAIN][entry.entry_id].alert_coordinator
-    probe = AlertProbe(coordinator, entry)
-    platform = next(
-        p
-        for p in async_get_platforms(hass, DOMAIN)
-        if p.config_entry and p.config_entry.entry_id == entry.entry_id and p.entities
+def get_alert_sensor(hass, entry):
+    """Find the real alert entity on its owning HA sensor platform."""
+    return next(
+        entity
+        for platform in async_get_platforms(hass, DOMAIN)
+        for entity in platform.entities.values()
+        if entity.unique_id == f"{DOMAIN}_{entry.entry_id}_route_alerts"
     )
-    await platform.async_add_entities([probe])
-    await hass.async_block_till_done()
-    return probe
 
 
 @pytest.fixture
@@ -406,8 +375,8 @@ async def test_no_departures_and_initial_alert_failure_retry(
     ptv_responses(ALERT_PATH, {"disruptions": {}}, status=503)
     entry = config_entry_factory()
     await setup_entry(hass, entry)
-    assert aioclient_mock.call_count == 1  # No enabled alert subscriber yet.
-    probe = await add_probe(hass, entry)
+    assert aioclient_mock.call_count == 2  # Timetable and initial alert request.
+    probe = get_alert_sensor(hass, entry)
     state = hass.states.get(probe.entity_id)
     assert state.state == STATE_UNAVAILABLE
     assert probe.coordinator.data == []
@@ -438,7 +407,7 @@ async def test_initial_timetable_failure_does_not_block_alerts(
     ptv_responses(ALERT_PATH, {"disruptions": {"general": [NOTICE]}})
     entry = config_entry_factory()
     await setup_entry(hass, entry)
-    probe = await add_probe(hass, entry)
+    probe = get_alert_sensor(hass, entry)
     assert hass.states.get(probe.entity_id).state == "1"
     assert hass.states.get(f"{ENTITY_PREFIX}_0").state == STATE_UNAVAILABLE
     aioclient_mock.clear_requests()
@@ -458,7 +427,7 @@ async def test_alert_failure_does_not_interrupt_timetable_or_last_good_data(
     ptv_responses(ALERT_PATH, {"disruptions": {"general": [NOTICE]}})
     entry = config_entry_factory()
     await setup_entry(hass, entry)
-    probe = await add_probe(hass, entry)
+    probe = get_alert_sensor(hass, entry)
     state = hass.states.get(probe.entity_id)
     previous = state.attributes["alerts"]
     updated = probe.coordinator.last_successful_update
@@ -486,15 +455,15 @@ async def test_real_entry_unload_reload_preserves_shared_owner(
     second_entry = config_entry_factory(direction="2", direction_name="Other")
     await setup_entry(hass, first_entry)
     await setup_entry(hass, second_entry)
-    first_probe = await add_probe(hass, first_entry)
-    second_probe = await add_probe(hass, second_entry)
+    first_probe = get_alert_sensor(hass, first_entry)
+    second_probe = get_alert_sensor(hass, second_entry)
     shared = first_probe.coordinator
     assert shared is second_probe.coordinator
     assert aioclient_mock.call_count == 3
     assert await hass.config_entries.async_unload(first_entry.entry_id)
     assert list(shared.async_contexts()) == [second_entry.entry_id]
     assert await hass.config_entries.async_setup(first_entry.entry_id)
-    reloaded = await add_probe(hass, first_entry)
+    reloaded = get_alert_sensor(hass, first_entry)
     assert reloaded.coordinator is shared
     assert aioclient_mock.call_count == 4  # Reloaded timetable; alerts reuse [] cache.
     assert await hass.config_entries.async_unload(first_entry.entry_id)
@@ -505,27 +474,28 @@ async def test_real_entry_unload_reload_preserves_shared_owner(
     await hass.async_block_till_done(wait_background_tasks=True)
     assert aioclient_mock.call_count == requests
     assert await hass.config_entries.async_setup(first_entry.entry_id)
-    new_probe = await add_probe(hass, first_entry)
+    new_probe = get_alert_sensor(hass, first_entry)
     assert new_probe.coordinator is not shared
     assert aioclient_mock.call_count == requests + 2
 
 
-async def test_registry_disabled_probe_never_subscribes(
+async def test_registry_disabled_alert_sensor_never_subscribes(
     hass, config_entry_factory, ptv_responses, aioclient_mock
 ):
     ptv_responses(DEPARTURE_PATH, {"departures": []})
     entry = config_entry_factory()
-    await setup_entry(hass, entry)
+    entry.add_to_hass(hass)
     registry = er.async_get(hass)
     registry.async_get_or_create(
         "sensor",
         DOMAIN,
-        f"test_alerts_{entry.entry_id}",
+        f"{DOMAIN}_{entry.entry_id}_route_alerts",
         config_entry=entry,
         disabled_by=er.RegistryEntryDisabler.USER,
     )
-    probe = await add_probe(hass, entry)
-    assert list(probe.coordinator.async_contexts()) == []
+    await setup_entry(hass, entry)
+    coordinator = hass.data[DOMAIN][entry.entry_id].alert_coordinator
+    assert list(coordinator.async_contexts()) == []
     assert aioclient_mock.call_count == 1
 
 

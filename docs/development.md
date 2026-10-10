@@ -6,7 +6,8 @@ It protects the inherited departure integration before alert implementation in
 #3–#5. Issue #6 stays open until the alert, shared-request, lifecycle and security
 acceptance criteria are covered. The #3 API client tests exercise the actual
 route disruption fetch method and parser. The #4 tests exercise the shared
-coordinator and entry lifecycle; production alert entities remain work item #5.
+coordinator and entry lifecycle. The #5 tests exercise production alert sensors,
+upgrade identities, default enablement and supported entity-registry operations.
 
 ## Pinned environment
 
@@ -103,11 +104,15 @@ Never restart HA, mount private configuration or operate devices to run tests.
   cache reuse, ten-minute freshness, expiry on cache reuse without a new update
   timestamp, concurrent initial/manual/periodic request coalescing, cancellation,
   stopping the last subscriber, and restarting subscriptions.
-- Real config-entry setup/unload/reload and test-only `CoordinatorEntity` consumers
+- Real config-entry setup/unload/reload and production `CoordinatorEntity` sensors
   on the sensor platform: zero departures, independent initial and refresh
   failures, unavailable state with last-good coordinator data, retries/recovery
-  and a registry-disabled consumer making no alert requests. Production alert-sensor
-  identities/defaults and registry enable/disable operations remain #5.
+  and a registry-disabled sensor making no alert requests.
+- Existing version-1 departure registry records preserved when adding the sixth
+  entity; distinct entry-specific alert identities, translated names, integer
+  counts, attribution, icons and complete route-wide metadata. Default enablement,
+  the disable-new-entities preference, registry disable/enable with HA's automatic
+  reload, shared polling, user name/entity-ID overrides, removal and manual updates.
 
 Logging checks are mandatory across the behavioural suite, with debug capture
 enabled and assertions that API keys and signed URL authentication parameters
@@ -122,8 +127,8 @@ remain covered. No logging tests are marked as expected failures.
 | Work item | Required additional behavioural checks |
 | --- | --- |
 | #3 API client | Covered by `tests/test_route_disruptions.py`, including every case in `tests/fixtures/route_alerts/cases.json`; extend these checks if the client contract changes. |
-| #4 Alert coordinator | Covered by `tests/test_alert_coordinator.py`, using the actual API/coordinator, HA entry lifecycle and test-only entities; public alert entities and their registry operations remain #5. |
-| #5 Alert entities | One sensor per existing entry, stable distinct identities for two entries, count/structured attributes, availability, default enablement and registry operations, plus all existing departure regression tests. |
+| #4 Alert coordinator | Covered by `tests/test_alert_coordinator.py`, using the actual API/coordinator, HA entry lifecycle and production entities. |
+| #5 Alert entities | Covered by `tests/test_alert_sensor.py` and the production-entity lifecycle tests in `tests/test_alert_coordinator.py`, plus all existing departure regressions in `tests/test_sensor.py`. |
 | #6 completion | Keep mandatory logging checks passing; complete the above tests before claiming route alerts are verified. |
 
 Use `load_json_fixture("route_alerts/<file>.json")` for fresh fixture objects.
