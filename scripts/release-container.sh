@@ -53,7 +53,7 @@ trap 'exit 143' TERM
 
 docker buildx create --name "$PTV_RELEASE_BUILDER" --driver docker-container
 docker buildx build --builder "$PTV_RELEASE_BUILDER" --load \
-    -f Dockerfile.test -t "$PTV_RELEASE_IMAGE" .
+    -f Dockerfile.release -t "$PTV_RELEASE_IMAGE" .
 docker run --rm --interactive --name "$PTV_RELEASE_CONTAINER" \
     --network bridge --read-only --tmpfs /tmp:rw,mode=1777,size=512m \
-    "$PTV_RELEASE_IMAGE" python scripts/release-check.py "$PTV_RELEASE_REF"
+    "$PTV_RELEASE_IMAGE" "$PTV_RELEASE_REF"

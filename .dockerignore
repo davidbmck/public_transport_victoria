@@ -1,6 +1,7 @@
 # Only public integration, tests, the example guide and tool configuration enter the image.
 *
 !Dockerfile.test
+!Dockerfile.release
 !requirements-build.txt
 !requirements-test.txt
 !pyproject.toml

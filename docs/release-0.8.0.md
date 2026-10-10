@@ -32,14 +32,15 @@ it does not add YAML integration configuration.
 - [x] Manifest candidate version `0.8.0`; documentation/support point to this fork.
 - [x] Upstream base commit recorded; existing author credits preserved.
 - [x] HACS repository topics supplied.
-- [ ] Complete offline regression suite and cleanup checks pass for the candidate.
-- [ ] Official hassfest passes for the candidate.
-- [ ] Actual HACS 2.0.5 backend installs upstream 0.7 and upgrades to the candidate.
-- [ ] A fresh disposable HA configuration persists two version-1 entries and
+- [x] All 180 offline regression tests and four cleanup harness tests pass.
+- [x] Official hassfest passes for the candidate.
+- [x] Actual HACS 2.0.5 backend installs upstream 0.7 and upgrades to the candidate.
+- [x] A fresh disposable HA configuration persists two version-1 entries and
       their ten departure identities across the source upgrade and HA restart.
-- [ ] Live PTV route discovery/notices across train, tram, bus and regional modes,
+- [x] Live PTV route discovery/notices across train, tram, bus and regional modes,
       availability, real authentication failure/recovery and unload/reload checked.
-- [ ] Installed manifest/source verified, package rebuilt and checksum checked.
+- [x] Installed manifest/source verified byte-for-byte against the checkout;
+      deterministic package, checksum and tag/version rejection checked.
 - [ ] HACS metadata validation fully passes with MIT for the fork's extensions.
 - [ ] Release PR reviewed and merged; tag and release artifact rebuilt from that
       reviewed commit, with tag exactly equal to manifest version.
@@ -49,6 +50,24 @@ The offline suite establishes repeatable empty/malformed/date boundary behavior
 using mocked APIs. A live trial can establish only the responses observed on its
 date; it cannot force PTV to publish an empty feed or every notice category.
 Neither kind of check establishes a production deployment or browser appearance.
+
+On 10 October 2026, live PTV route samples were train `1` (three notices,
+`metro_train`), tram `721` (two, `metro_tram`), bus `786` (zero), and regional
+`1512` (zero). These are observations, not guarantees of future feed contents.
+Two configured directions shared one healthy coordinator. A request signed with
+a synthetic invalid key made both alert sensors unavailable, retained their last
+successful snapshot/timestamp, and recovered with the real key. Unloading both
+entries stopped the old coordinator; reloading restored available alert sensors.
+All ten departure IDs/unique IDs/entry associations survived the source upgrade,
+including a customised entity ID and display name. The restarted candidate's
+captured debug logs contained no API key or signed request URL. Upstream 0.7's
+debug logs do contain signed URLs; the trial keeps their raw contents in memory
+and reports only source locations.
+
+HACS currently passes eight of nine metadata checks. The remaining licence check
+reads GitHub's repository metadata, which still describes the default branch
+without a licence. Rerun it after merging this PR; do not ignore the check or
+claim that MIT grants rights in inherited upstream source.
 
 ## Reproduce validation
 
@@ -68,7 +87,8 @@ credentials runs only source installation and does not establish upgrade or live
 API acceptance. Logs are captured in memory and checked without printing signed
 URLs or credentials. Failures report exception type/source location only.
 
-The trial uses the pinned test image, a named foreground disposable container,
+The trial uses `Dockerfile.release`, pinned to the official Home Assistant
+2026.9.4 image (Python 3.14.6), and a named foreground disposable container,
 Docker bridge networking, read-only root and a temporary `/tmp` filesystem. There
 are no host mounts, published ports, Docker socket or device access. It downloads
 digest-verified official HACS 2.0.5 and exercises its actual registration/download
