@@ -1,10 +1,9 @@
 # Development and regression checks
 
-This is the initial test harness for
+This is the regression harness for
 [issue #6](https://github.com/davidbmck/public_transport_victoria/issues/6).
-It protects the inherited departure integration before alert implementation in
-#3–#5. Issue #6 stays open until the alert, shared-request, lifecycle and security
-acceptance criteria are covered. The #3 API client tests exercise the actual
+It protects the inherited departure integration and route alerts implemented in
+#3–#5. The #3 API client tests exercise the actual
 route disruption fetch method and parser. The #4 tests exercise the shared
 coordinator and entry lifecycle. The #5 tests exercise production alert sensors,
 upgrade identities, default enablement and supported entity-registry operations.
@@ -122,14 +121,49 @@ logging exception text, raw configuration or API payloads; request exceptions ca
 contain authentication data. Signing, flow error responses, setup failure states and entity availability
 remain covered. No logging tests are marked as expected failures.
 
-## Alert coverage to add alongside implementation
+## Issue #6 acceptance audit
+
+The audit covers the merged alert implementation from issues #3–#5 and the
+additional payload-failure regressions. Each row maps an acceptance criterion to
+executable evidence; synthetic fixture counts alone are not runtime verification.
+
+| Acceptance criterion | Evidence |
+| --- | --- |
+| Reproducible, isolated environment and behavioural CI | Digest-pinned `Dockerfile.test`, hashed requirements, socket blocking in `pyproject.toml`, shared `scripts/test-container.sh` and `.github/workflows/tests.yaml`; cleanup failures tested by `scripts/test-container-cleanup.py`. |
+| Every category, general/planned notices, IDs/order, missing metadata, expiry and timezone boundaries | `test_contract_cases` in `tests/test_route_disruptions.py` consumes every `cases.json` expectation through the API client in Melbourne and UTC; additional timestamp, ID and source-ownership tests. |
+| Zero departures, successful emptiness and independent failures | Production sensor tests in `tests/test_alert_coordinator.py`; `tests/test_alert_failures.py` verifies good → malformed/offline → empty → non-empty recovery through the API, coordinator and HA state machine. |
+| Shared requests, credential separation and lifecycle | Coordinator tests cover setup/manual/periodic coalescing, exact credentials, empty cache reuse, cancellation, last-subscriber removal and shared ownership; production sensor tests cover unload/reload and automatic reload on registry enablement. |
+| Existing-entry upgrades and two directions | `tests/test_sensor.py` preserves departure names, IDs, unique IDs, attributes, selection and polling; `tests/test_alert_sensor.py` seeds existing version-1 registry records and checks entry ownership and distinct alert identities. |
+| Failure signals and safe logging | `safe_logs` in `tests/conftest.py` checks setup/call/teardown logs, including debug tracebacks, for both synthetic API keys and signed URL parameters. No logging checks are expected failures. |
+| Home Assistant/HACS validation and remaining metadata work | Behavioural workflow and manual hassfest/HACS results are reported separately below; missing licence/topics, IoT class and schema remain explicit follow-ups. |
+| No live credentials or household data | Public synthetic fixtures and mocked HTTP responses only; network-disabled foreground containers have no production mounts or devices. |
+
+The isolated tests satisfy the development-test scope of #6. They do not establish
+live API, installation/upgrade, release packaging, production or multi-version
+compatibility; disposable installation and release validation remain #8.
+
+On 10 October 2026, `sh scripts/test-container.sh` passed lint/format checks and
+all **150 behavioural tests** for this audit on Linux amd64. The four cleanup
+error-handling checks also passed. The merged alert baseline's
+[behavioural CI](https://github.com/davidbmck/public_transport_victoria/actions/runs/38045337963)
+passed; its [HACS run](https://github.com/davidbmck/public_transport_victoria/actions/runs/38045337935)
+failed only on licence/topics. The integration source and metadata are unchanged
+by this audit, so the recorded 10 October hassfest result remains applicable.
+
+The oversized-ID parser boundary test supplies mocked decoded JSON; it does not
+establish how Home Assistant's JSON decoder handles numbers outside its supported
+range. Client/body failures and unavailable sensor behaviour are tested
+separately. Browser rendering, a live PTV feed and production installation are
+outside this harness.
+
+## Coverage ownership
 
 | Work item | Required additional behavioural checks |
 | --- | --- |
 | #3 API client | Covered by `tests/test_route_disruptions.py`, including every case in `tests/fixtures/route_alerts/cases.json`; extend these checks if the client contract changes. |
 | #4 Alert coordinator | Covered by `tests/test_alert_coordinator.py`, using the actual API/coordinator, HA entry lifecycle and production entities. |
 | #5 Alert entities | Covered by `tests/test_alert_sensor.py` and the production-entity lifecycle tests in `tests/test_alert_coordinator.py`, plus all existing departure regressions in `tests/test_sensor.py`. |
-| #6 completion | Keep mandatory logging checks passing; complete the above tests before claiming route alerts are verified. |
+| #6 audit | `tests/test_alert_failures.py` covers malformed/offline payload recovery through the public sensor; the acceptance audit above records completed coverage and validation limits. |
 
 Use `load_json_fixture("route_alerts/<file>.json")` for fresh fixture objects.
 Do not duplicate the planned parser in tests or turn fixture counts into tests
@@ -148,14 +182,14 @@ The inherited workflow is now accurately named `HACS validation`; it uses the
 HACS action, not hassfest, and does not post PR comments. Its actual results must
 be reported separately from the regression tests.
 
-The first harness CI run on 5 October 2026 passed the behavioural workflow
-(19 passed, two strict expected failures). HACS validation failed because the
-fork has no recognised licence and no valid repository topics; its integration
+The alert-sensor PR's behavioural runs on 10 October 2026 passed all 147 tests,
+with no expected failures. HACS validation failed because the fork has no
+recognised licence and no valid repository topics; its integration
 manifest, HACS configuration and brands checks passed. Resolve the licence with
 the upstream author rather than inventing a licence for inherited code, and
 address repository topics separately before claiming HACS validation passes.
 
-Official hassfest was run against this checkout on 5 October 2026 using
+Official hassfest was run against the alert-sensor checkout on 10 October 2026 using
 `ghcr.io/home-assistant/hassfest@sha256:39031fe75baf5566814a01f3c414764c029c54a0e1d742965d5b94a0d6120875`.
 It fails on an inherited missing manifest `iot_class` and warns that
 `async_setup` has no explicit configuration schema. Before making hassfest a

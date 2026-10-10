@@ -14,6 +14,7 @@ from custom_components.public_transport_victoria.const import DOMAIN
 FIXTURE_ROOT = Path(__file__).parent / "fixtures"
 PTV_ORIGIN = "https://timetableapi.ptv.vic.gov.au"
 SYNTHETIC_API_KEY = "synthetic-test-key-not-a-credential"
+SECOND_SYNTHETIC_API_KEY = "another-synthetic-key"
 
 
 @pytest.fixture(autouse=True)
@@ -95,5 +96,10 @@ def safe_logs(caplog):
         for phase in ("setup", "call", "teardown")
         for record in caplog.get_records(phase)
     )
-    for sensitive in (SYNTHETIC_API_KEY, "devid=", "signature="):
+    for sensitive in (
+        SYNTHETIC_API_KEY,
+        SECOND_SYNTHETIC_API_KEY,
+        "devid=",
+        "signature=",
+    ):
         assert sensitive not in captured
