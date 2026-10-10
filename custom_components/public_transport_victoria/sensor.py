@@ -23,7 +23,11 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     coordinator = PublicTransportVictoriaDataUpdateCoordinator(hass, connector)
 
     # Fetch initial data
-    await coordinator.async_config_entry_first_refresh()
+    if connector.departure_setup_error is None:
+        await coordinator.async_config_entry_first_refresh()
+    else:
+        coordinator.data = []
+        coordinator.async_set_update_error(connector.departure_setup_error)
 
     # Create sensors for the first 5 departures
     new_devices = [PublicTransportVictoriaSensor(coordinator, i) for i in range(5)]
@@ -49,12 +53,12 @@ class PublicTransportVictoriaDataUpdateCoordinator(DataUpdateCoordinator):
         _LOGGER.debug("Fetching new data from Public Transport Victoria API.")
         try:
             await self.connector.async_update()
+            return self.connector.departures
         except Exception as err:
             # Request exceptions may contain signed URLs or response payloads.
             raise UpdateFailed(
                 f"PTV departure refresh failed ({type(err).__name__})"
             ) from None
-        return self.connector.departures  # Return the latest data
 
 
 class PublicTransportVictoriaSensor(CoordinatorEntity, Entity):
