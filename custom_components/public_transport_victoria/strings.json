@@ -1,4 +1,11 @@
 {
+  "entity": {
+    "sensor": {
+      "route_alerts": {
+        "name": "{route_name} line to {direction_name} from {stop_name} alerts"
+      }
+    }
+  },
   "config": {
     "step": {
       "user": {

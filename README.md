@@ -6,9 +6,11 @@ The `public transport victoria` sensor platform uses the [Public Transport Victo
 
 This is a development fork of [bremor/public_transport_victoria](https://github.com/bremor/public_transport_victoria). The aim is to add general, structured route alerts and disruption notices while preserving existing configurations and departure entities, then contribute the feature back upstream.
 
-The planned work includes current and planned notices across transport modes, alert polling independent of departures, and regression tests. These features are still in development; see the [development backlog](https://github.com/davidbmck/public_transport_victoria/issues/1) for progress.
+The implementation includes current and planned notices across transport modes, alert polling independent of departures, and regression tests. Release validation is still in development; see the [development backlog](https://github.com/davidbmck/public_transport_victoria/issues/1) for progress.
 
-The [route alert contract](docs/route-alert-contract.md) defines the planned sensor behaviour and [synthetic response fixtures](tests/fixtures/route_alerts/README.md). It is a development specification; alert sensors are not implemented yet.
+Each configuration entry now adds one alert sensor alongside its five existing departure sensors. It is enabled and visible by default, including for existing entries, unless Home Assistant is configured to disable newly added entities. Its state counts route-wide notices, and its `alerts` attribute contains their structured details. Alerts refresh every ten minutes even with no departures; matching routes and credentials share requests. Failed alert requests make the sensor unavailable until recovery. Disable the alert sensor in Home Assistant to opt out; disabling the last sensor sharing a feed stops alert polling.
+
+The [route alert contract](docs/route-alert-contract.md) defines sensor identity, attributes, dates and polling behavior, with [synthetic response fixtures](tests/fixtures/route_alerts/README.md). This implementation has been tested in an isolated development environment; installation and release trials remain separate backlog work.
 
 For isolated regression tests, run `sh scripts/test-container.sh` from this checkout. The [development guide](docs/development.md) explains the pinned Home Assistant container, checks, cleanup and remaining alert test work.
 

@@ -32,9 +32,16 @@ def departure_responses(ptv_responses, load_json_fixture):
     return register
 
 
+@pytest.fixture(autouse=True)
+def empty_route_alerts(ptv_responses):
+    """Exercise departure regressions with the new enabled alert sensor too."""
+    ptv_responses("/v3/disruptions/route/9001", {"disruptions": {}})
+
+
 async def setup_entry(hass, entry):
     """Exercise normal config-entry setup, including the actual sensor platform."""
-    entry.add_to_hass(hass)
+    if hass.config_entries.async_get_entry(entry.entry_id) is None:
+        entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
     assert entry.state is ConfigEntryState.LOADED
@@ -61,7 +68,7 @@ async def test_existing_entry_departures(
 
     registry = er.async_get(hass)
     entities = er.async_entries_for_config_entry(registry, entry.entry_id)
-    assert len(entities) == 5
+    assert len(entities) == 6
     for index in range(5):
         entity_id = f"{ENTITY_PREFIX}_{index}"
         expected_name = (
@@ -110,8 +117,16 @@ async def test_two_directions_on_one_route(
     await setup_entry(hass, inbound)
 
     registry = er.async_get(hass)
-    first = er.async_entries_for_config_entry(registry, outbound.entry_id)
-    second = er.async_entries_for_config_entry(registry, inbound.entry_id)
+    first = [
+        e
+        for e in er.async_entries_for_config_entry(registry, outbound.entry_id)
+        if not e.unique_id.endswith("_route_alerts")
+    ]
+    second = [
+        e
+        for e in er.async_entries_for_config_entry(registry, inbound.entry_id)
+        if not e.unique_id.endswith("_route_alerts")
+    ]
     assert len(first) == len(second) == 5
     assert {e.entity_id for e in first}.isdisjoint(e.entity_id for e in second)
     assert {e.unique_id for e in first}.isdisjoint(e.unique_id for e in second)
@@ -138,7 +153,7 @@ async def test_empty_departures(
 
     for index in range(5):
         assert hass.states.get(f"{ENTITY_PREFIX}_{index}").state == "No data"
-    assert aioclient_mock.call_count == 1
+    assert aioclient_mock.call_count == 2
 
 
 async def test_unload_reload_preserves_registry(
@@ -169,7 +184,7 @@ async def test_unload_reload_preserves_registry(
 
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    assert aioclient_mock.call_count == initial_requests + 3
+    assert aioclient_mock.call_count == initial_requests + 4
     assert identities == {
         e.entity_id: (e.id, e.unique_id)
         for e in er.async_entries_for_config_entry(registry, entry.entry_id)
@@ -230,7 +245,7 @@ async def test_ten_minute_departure_polling(
     freezer.tick(timedelta(minutes=1, seconds=1))
     async_fire_time_changed(hass, dt_util.utcnow())
     await hass.async_block_till_done(wait_background_tasks=True)
-    assert aioclient_mock.call_count == initial_requests + 3
+    assert aioclient_mock.call_count == initial_requests + 4
 
 
 @pytest.mark.parametrize("error_type", [ClientConnectionError, ValueError])

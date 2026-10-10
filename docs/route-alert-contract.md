@@ -4,8 +4,8 @@ This specification resolves [issue #2](https://github.com/davidbmck/public_trans
 under the [route alerts backlog](https://github.com/davidbmck/public_transport_victoria/issues/1).
 It defines the behaviour to implement in issues #3–#5 and test in #6. The API
 client and shared coordinator implement fetching, parsing and polling below.
-The production alert sensor remains work item #5; entries without an enabled
-alert subscriber make no alert requests.
+The alert sensor implements the entity contract below; entries without an
+enabled alert subscriber make no alert requests.
 
 `Connector.async_route_disruptions()` fetches the configured route independently
 of departure initialization and returns normalized, ordered, non-expired notice
@@ -54,9 +54,9 @@ snapshot and timestamp remain in the coordinator for recovery.
 Initial timetable failures now leave the entry loaded with unavailable departure
 entities and their existing retry/polling behaviour, allowing independent alert
 setup. Existing successful setup, departure identities, config-entry fields and
-polling intervals remain unchanged; no migration is required. The tests use a
-test-only consumer to verify availability through Home Assistant until #5 adds
-the public alert sensor.
+polling intervals remain unchanged; no migration is required. The tests verify
+availability and registry operations using the production alert sensor through
+Home Assistant's sensor platform.
 
 ## Entity and compatibility
 
@@ -101,8 +101,10 @@ belong in attributes, never in the state.
 Do not publish a changing timestamp merely for an unsuccessful attempt. On a
 failed refresh, Home Assistant's state is `unavailable`. Last-good `alerts` and
 `last_successful_update` may remain visible, but the state must stay unavailable
-until a complete successful refresh. Before the first success, `alerts` is `[]`
-and `last_successful_update` is `null`, with state unavailable, never `0`.
+until a complete successful refresh. Before the first success, the coordinator
+snapshot has `alerts: []` and `last_successful_update: null`, with state
+unavailable, never `0`. Home Assistant may omit custom entity attributes while
+unavailable; the snapshot remains in the coordinator.
 Consumers must check availability before interpreting the count or attributes.
 On recovery, atomically replace the old snapshot, including with `[]` and `0`.
 
