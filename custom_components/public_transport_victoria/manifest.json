@@ -2,10 +2,11 @@
   "domain": "public_transport_victoria",
   "name": "Public Transport Victoria",
   "config_flow": true,
-  "documentation": "https://github.com/bremor/public_transport_victoria",
-  "issue_tracker": "https://github.com/bremor/public_transport_victoria/issues",
+  "documentation": "https://github.com/davidbmck/public_transport_victoria",
+  "issue_tracker": "https://github.com/davidbmck/public_transport_victoria/issues",
+  "iot_class": "cloud_polling",
   "requirements": [],
   "dependencies": [],
-  "version": "0.7",
+  "version": "0.8.0",
   "codeowners": ["@bremor", "@catatonicChimp"]
 }

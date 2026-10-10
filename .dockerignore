@@ -11,6 +11,8 @@
 !tests/**
 !docs/
 !docs/alerts.md
+!scripts/
+!scripts/release-check.py
 **/__pycache__/
 **/*.pyc
 **/.pytest_cache/
