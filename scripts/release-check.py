@@ -50,12 +50,14 @@ async def home_assistant(config_dir):
     from homeassistant import config_entries, loader
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers import frame
+    from homeassistant.setup import async_setup_component
 
     hass = HomeAssistant(str(config_dir))
     loader.async_setup(hass)
     frame.async_setup(hass)
     hass.config_entries = config_entries.ConfigEntries(hass, {})
     await hass.config_entries.async_initialize()
+    assert await async_setup_component(hass, "network", {})
     await hass.config.async_set_time_zone("Australia/Melbourne")
     return hass
 
@@ -290,7 +292,13 @@ async def download_hacs(config_dir):
         ) as response:
             response.raise_for_status()
             archive = await response.read()
-    assert hashlib.sha256(archive).hexdigest() == HACS_SHA256
+    actual_digest = hashlib.sha256(archive).hexdigest()
+    if actual_digest != HACS_SHA256:
+        print(
+            json.dumps({"hacs_archive_sha256": actual_digest, "bytes": len(archive)}),
+            flush=True,
+        )
+        raise AssertionError("HACS archive digest mismatch")
     with zipfile.ZipFile(io.BytesIO(archive)) as bundle:
         bundle.extractall(config_dir / "custom_components" / "hacs")
 
@@ -351,7 +359,8 @@ if __name__ == "__main__":
         location = traceback.extract_tb(error.__traceback__)[-1]
         print(
             f"Release check failed ({type(error).__name__}) at "
-            f"{Path(location.filename).name}:{location.lineno}; raw text withheld.",
+            f"{'/'.join(Path(location.filename).parts[-3:])}:{location.lineno}; "
+            "raw text withheld.",
             file=sys.stderr,
         )
         sys.exit(1)

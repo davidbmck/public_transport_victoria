@@ -6,11 +6,11 @@ The `public transport victoria` sensor platform uses the [Public Transport Victo
 
 This is a development fork of [bremor/public_transport_victoria](https://github.com/bremor/public_transport_victoria). The aim is to add general, structured route alerts and disruption notices while preserving existing configurations and departure entities, then contribute the feature back upstream.
 
-The implementation includes current and planned notices across transport modes, alert polling independent of departures, and regression tests. Release validation is still in development; see the [development backlog](https://github.com/davidbmck/public_transport_victoria/issues/1) for progress.
+The implementation includes current and planned notices across transport modes, alert polling independent of departures, and regression tests. **Version 0.8.0 is the first route-alert release candidate**, based on upstream 0.7. See its [release notes, validation checklist and rollback instructions](docs/release-0.8.0.md) and the [development backlog](https://github.com/davidbmck/public_transport_victoria/issues/1). A candidate is not a published release; the checklist records the remaining gates.
 
 Each configuration entry now adds one alert sensor alongside its five existing departure sensors. It is enabled and visible by default, including for existing entries, unless Home Assistant is configured to disable newly added entities. Its state counts route-wide notices, and its `alerts` attribute contains their structured details. Alerts refresh every ten minutes even with no departures; matching routes and credentials share requests. Failed alert requests make the sensor unavailable until recovery. Disable the alert sensor in Home Assistant to opt out; disabling the last sensor sharing a feed stops alert polling.
 
-The [route alert contract](docs/route-alert-contract.md) defines sensor identity, attributes, dates and polling behavior, with [synthetic response fixtures](tests/fixtures/route_alerts/README.md). This implementation has been tested in an isolated development environment; installation and release trials remain separate backlog work.
+The [route alert contract](docs/route-alert-contract.md) defines sensor identity, attributes, dates and polling behavior, with [synthetic response fixtures](tests/fixtures/route_alerts/README.md). Regression tests use mocked APIs. The release checklist separately records disposable HACS installation, upgrade and live PTV API validation; production installation and dashboard migration require a separate deployment task.
 
 The [alert user guide](docs/alerts.md) includes state/attribute reference, a standard Markdown card, a feed-status automation, an optional scrolling display, consumer filtering and guidance for switching code or migrating a local `disruptions` patch. See [CONTRIBUTING.md](CONTRIBUTING.md) for development and contribution checks.
 
@@ -23,6 +23,10 @@ This fork is unlikely to become a long-term maintained alternative to the origin
 [![hacs][hacsbadge]][hacs]
 
 This fork is not in the HACS default store. To install it through HACS, add `https://github.com/davidbmck/public_transport_victoria` as a [custom repository](https://www.hacs.xyz/docs/faq/custom_repositories/) with type **Integration**. For manual installation, copy `custom_components/public_transport_victoria` into your Home Assistant configuration directory.
+
+Once published, select release `0.8.0` in HACS rather than assuming an older tag contains alerts. The release archive contains the integration's Python source and metadata, with no JavaScript build. Keep a private backup and the current integration source for rollback. Preserve existing configuration entries and departure entity IDs; consumers of a local custom `disruptions` attribute need the [separate alert migration](docs/alerts.md#migrate-a-local-disruptions-patch).
+
+This fork's original additions and changes are licensed under [MIT](LICENSE). The inherited upstream integration has **no declared software licence**; MIT does not relicense that code. See [licence scope and provenance](LICENSE_SCOPE.md). PTV's existing data attribution is separate and preserved.
 
 ## Prerequisites
 
