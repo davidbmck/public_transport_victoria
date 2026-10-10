@@ -1,8 +1,9 @@
-# Route-alert release candidate 0.8.0
+# Route-alert release 0.8.0: validation and rollback
 
 Tracked in [issue #8](https://github.com/davidbmck/public_transport_victoria/issues/8).
-This document is the candidate checklist and intended release notes, not a claim
-that a release has already been published. The upstream base is
+This document records validation before publication and the release procedure.
+See [published releases](https://github.com/davidbmck/public_transport_victoria/releases)
+for the final tag, source commit and post-merge validation. The upstream base is
 [`dc4bf2b4a50e7b335a9d736a00e42fa8b52c21bb`](https://github.com/bremor/public_transport_victoria/commit/dc4bf2b4a50e7b335a9d736a00e42fa8b52c21bb)
 (upstream 0.7). Original author acknowledgements and PTV data attribution remain.
 
@@ -41,10 +42,11 @@ it does not add YAML integration configuration.
       availability, real authentication failure/recovery and unload/reload checked.
 - [x] Installed manifest/source verified byte-for-byte against the checkout;
       deterministic package, checksum and tag/version rejection checked.
-- [ ] HACS metadata validation fully passes with MIT for the fork's extensions.
-- [ ] Release PR reviewed and merged; tag and release artifact rebuilt from that
-      reviewed commit, with tag exactly equal to manifest version.
-- [ ] Separately authorised production trial (not part of candidate development).
+
+Publication requires a reviewed and merged release PR, a passing post-merge HACS
+metadata check, and an artifact rebuilt from that commit with tag exactly equal
+to manifest version. Record those results in the published release. A separately
+authorised production trial is a later deployment step.
 
 The offline suite establishes repeatable empty/malformed/date boundary behavior
 using mocked APIs. A live trial can establish only the responses observed on its
@@ -64,7 +66,7 @@ captured debug logs contained no API key or signed request URL. Upstream 0.7's
 debug logs do contain signed URLs; the trial keeps their raw contents in memory
 and reports only source locations.
 
-HACS currently passes eight of nine metadata checks. The remaining licence check
+The pre-merge HACS run passed eight of nine metadata checks. Its licence check
 reads GitHub's repository metadata, which still describes the default branch
 without a licence. Rerun it after merging this PR; do not ignore the check or
 claim that MIT grants rights in inherited upstream source.
