@@ -5,7 +5,7 @@ and [issue #2](https://github.com/davidbmck/public_transport_victoria/issues/2).
 The API client tests in `tests/test_route_disruptions.py` exercise these inputs
 and expectations through the actual fetch method. Use the
 [issue #6 harness](../../../docs/development.md) to run that coverage and extend
-it with coordinator and entity checks alongside issues #4–#5.
+it with the coordinator and production entity checks from issues #4–#5.
 
 ## Provenance
 
@@ -73,8 +73,11 @@ Repeat expiry checks with Home Assistant configured in both Melbourne and UTC;
 the results must match. The spring/autumn fixtures compare supplied offsets,
 not ambiguous local clock text.
 
-Further request mocks belong in #6: HTTP authentication/server errors, timeouts,
-network failures, invalid JSON, and good → failure → empty → non-empty recovery.
-Lifecycle mocks must cover zero departures, independent timetable/alert
-failures, shared requests with two entries, credential separation, disabling,
-unload/reload, and safe logging. These JSON examples alone cannot verify them.
+The API, coordinator and sensor suites also cover HTTP authentication/server
+errors, timeouts, network/JSON failures and good → failure → empty → non-empty
+recovery. `tests/test_alert_failures.py` exercises malformed and offline fixtures
+through the public sensor. Lifecycle tests cover zero departures, independent
+failures, shared requests, credential separation, disabling, unload/reload and
+safe logging. See the [acceptance audit](../../../docs/development.md) for test
+ownership and remaining validation limits. These JSON examples alone cannot
+verify those behaviours.

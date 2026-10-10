@@ -23,7 +23,7 @@ from custom_components.public_transport_victoria.alert_coordinator import (
 )
 from custom_components.public_transport_victoria.const import DOMAIN
 
-from .conftest import SYNTHETIC_API_KEY
+from .conftest import SECOND_SYNTHETIC_API_KEY, SYNTHETIC_API_KEY
 from .test_sensor import DEPARTURE_PATH, ENTITY_PREFIX, setup_entry
 
 ALERT_PATH = "/v3/disruptions/route/9001"
@@ -99,7 +99,7 @@ async def test_ownership_is_lazy_and_scope_is_exact(acquire, aioclient_mock):
     [
         {"route": "9002"},
         {"id": "54321"},
-        {"api_key": "another-synthetic-key"},
+        {"api_key": SECOND_SYNTHETIC_API_KEY},
         {"id": 12345},
     ],
 )
