@@ -2,9 +2,10 @@
 
 These examples support the [route alert contract](../../../docs/route-alert-contract.md)
 and [issue #2](https://github.com/davidbmck/public_transport_victoria/issues/2).
-They are fixture inputs and expectations, not an implemented alert test suite.
-Use the [issue #6 harness](../../../docs/development.md) to add behavioural
-coverage alongside issues #3–#5.
+The API client tests in `tests/test_route_disruptions.py` exercise these inputs
+and expectations through the actual fetch method. Use the
+[issue #6 harness](../../../docs/development.md) to run that coverage and extend
+it with coordinator and entity checks alongside issues #4–#5.
 
 ## Provenance
 

@@ -2,9 +2,22 @@
 
 This specification resolves [issue #2](https://github.com/davidbmck/public_transport_victoria/issues/2)
 under the [route alerts backlog](https://github.com/davidbmck/public_transport_victoria/issues/1).
-It defines the behaviour to implement in issues #3–#5 and test in #6. This change
-adds documentation and synthetic fixtures only; the integration does not yet
-provide alert sensors.
+It defines the behaviour to implement in issues #3–#5 and test in #6. The API
+client implements the fetch and parsing contract below; the integration does
+not yet provide alert polling or sensors.
+
+`Connector.async_route_disruptions()` fetches the configured route independently
+of departure initialization and returns normalized, ordered, non-expired notice
+objects. It uses Home Assistant's shared HTTP session with a 30-second total
+timeout (10-second connection limits and a 20-second socket-read limit), without
+closing that session. HTTP, network, timeout and JSON failures propagate;
+offline or malformed payloads raise `RouteDisruptionsError` with a safe message.
+Callers must avoid logging raw transport exceptions, which may contain signed
+URLs. Successful empty responses return `[]`.
+
+Parsing is separate from HTTP fetching. `non_expired_disruptions()` can
+re-evaluate a successful normalized snapshot against one aware reference instant
+when the later coordinator reuses it; this does not make a failed refresh healthy.
 
 ## Entity and compatibility
 
