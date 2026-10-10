@@ -48,8 +48,8 @@ Confirm the selected context with `docker context show` before running; use an
 engine suitable for disposable development tests and keep it separate from live
 Home Assistant configuration.
 
-The build copies only the public integration, test files and tool configuration
-from this checkout into `/workspace` inside the image; `.dockerignore` is an
+The build copies only the public integration, test files, alert example guide and
+tool configuration from this checkout into `/workspace` inside the image; `.dockerignore` is an
 allowlist. Building requires internet access to retrieve the base image and
 hashed development dependencies. Test runs use the copied files, no host mounts,
 no published ports, no network, a read-only root filesystem and a temporary

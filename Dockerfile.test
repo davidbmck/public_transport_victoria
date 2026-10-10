@@ -14,5 +14,6 @@ RUN python -m pip install --no-cache-dir --require-hashes -r requirements-build.
 COPY pyproject.toml ./
 COPY custom_components/public_transport_victoria ./custom_components/public_transport_victoria
 COPY tests ./tests
+COPY docs/alerts.md ./docs/alerts.md
 
 CMD ["python", "-m", "pytest", "-o", "cache_dir=/tmp/pytest-cache"]

@@ -1,4 +1,4 @@
-# Only the public integration, tests and their tool configuration enter the image.
+# Only public integration, tests, the example guide and tool configuration enter the image.
 *
 !Dockerfile.test
 !requirements-build.txt
@@ -9,6 +9,8 @@
 !custom_components/public_transport_victoria/**
 !tests/
 !tests/**
+!docs/
+!docs/alerts.md
 **/__pycache__/
 **/*.pyc
 **/.pytest_cache/
