@@ -5,13 +5,20 @@ import datetime
 import hmac
 from hashlib import sha1
 
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.util import Throttle
 from homeassistant.util.dt import get_time_zone
+
+from .route_disruptions import RouteDisruptionsError, parse_route_disruptions
 
 
 BASE_URL = "https://timetableapi.ptv.vic.gov.au"
 DEPARTURES_PATH = "/v3/departures/route_type/{}/stop/{}/route/{}?direction_id={}&max_results={}"
 DIRECTIONS_PATH = "/v3/directions/route/{}"
+DISRUPTIONS_PATH = "/v3/disruptions/route/{}"
+DISRUPTIONS_TIMEOUT = aiohttp.ClientTimeout(
+    total=30, connect=10, sock_connect=10, sock_read=20
+)
 MIN_TIME_BETWEEN_UPDATES = datetime.timedelta(minutes=2)
 MAX_RESULTS = 5
 ROUTE_TYPES_PATH = "/v3/route_types"
@@ -60,6 +67,22 @@ class Connector:
                 route_types[str(r["route_type"])] = r["route_type_name"]
 
             return route_types
+
+    async def async_route_disruptions(self):
+        """Fetch structured route-wide notices without touching departures.
+
+        Transport/HTTP/JSON and payload failures propagate to the caller. Only
+        a complete successful response can return an empty list. Callers must
+        not log raw request exceptions, which can contain signed URLs.
+        """
+        url = build_URL(self.id, self.api_key, DISRUPTIONS_PATH.format(int(self.route)))
+        session = async_get_clientsession(self.hass)
+        async with session.get(url, timeout=DISRUPTIONS_TIMEOUT) as response:
+            response.raise_for_status()
+            if not 200 <= response.status < 300:
+                raise RouteDisruptionsError("Unexpected route disruptions HTTP status")
+            payload = await response.json()
+        return parse_route_disruptions(payload)
 
     async def async_routes(self, route_type):
         """Get routes from Public Transport Victoria API."""

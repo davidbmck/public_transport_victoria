@@ -4,8 +4,9 @@ This is the initial test harness for
 [issue #6](https://github.com/davidbmck/public_transport_victoria/issues/6).
 It protects the inherited departure integration before alert implementation in
 #3–#5. Issue #6 stays open until the alert, shared-request, lifecycle and security
-acceptance criteria are covered. No alert parser is implemented in the tests,
-and no placeholder tests claim that the planned alert behaviour already works.
+acceptance criteria are covered. The #3 API client tests exercise the actual
+route disruption fetch method and parser; polling and alert entities remain
+separate work in #4–#5.
 
 ## Pinned environment
 
@@ -92,6 +93,13 @@ Never restart HA, mount private configuration or operate devices to run tests.
   after unload.
 - New-entry config flow and reuse of credentials by a second entry, plus route
   sorting and API network-exception propagation.
+- Route disruption API responses across every contract fixture, in Melbourne
+  and UTC: all categories, original metadata, duplicate selection, anonymous
+  records, deterministic ordering, planned notices and expiry boundaries.
+- Shared-session ownership, response-context consumption, bounded request
+  timeouts, HTTP/authentication/network/JSON failures, cancellation and recovery.
+  These API tests require no departure initialization and do not establish
+  coordinator lifecycle or alert-entity behaviour.
 
 Logging checks are mandatory across the behavioural suite, with debug capture
 enabled and assertions that API keys and signed URL authentication parameters
@@ -105,7 +113,7 @@ remain covered. No logging tests are marked as expected failures.
 
 | Work item | Required additional behavioural checks |
 | --- | --- |
-| #3 API client | Consume every case in `tests/fixtures/route_alerts/cases.json`; check all categories, retained metadata, IDs/duplicates/order, current/planned notices, missing/malformed dates, exact boundaries and timezone independence. Mock authentication/HTTP/timeout/JSON failures and verify shared-session response consumption and bounded timeouts. |
+| #3 API client | Covered by `tests/test_route_disruptions.py`, including every case in `tests/fixtures/route_alerts/cases.json`; extend these checks if the client contract changes. |
 | #4 Alert coordinator | Zero departures; empty-feed caching; independent timetable/alert failures and recovery; concurrent request coalescing; reuse for equal routes/credentials and separation for different credentials; ownership, disabling and unload/reload. |
 | #5 Alert entities | One sensor per existing entry, stable distinct identities for two entries, count/structured attributes, availability, default enablement and registry operations, plus all existing departure regression tests. |
 | #6 completion | Keep mandatory logging checks passing; complete the above tests before claiming route alerts are verified. |
