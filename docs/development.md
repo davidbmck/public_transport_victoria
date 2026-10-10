@@ -205,6 +205,15 @@ docker run --rm --network none --read-only \
   ghcr.io/home-assistant/hassfest@sha256:39031fe75baf5566814a01f3c414764c029c54a0e1d742965d5b94a0d6120875
 ```
 
+The [0.8.0 release candidate](release-0.8.0.md) addresses the metadata findings
+above: it declares the cloud-poll IoT class and config-entry-only schema, and
+passes the same official hassfest check. Repository topics are now present. MIT
+applies only to this fork's original extensions; inherited upstream source still
+has no declared software licence. HACS checks GitHub's repository licence
+metadata, so its remaining licence gate must be rerun after the release PR adds
+the licence to the default branch. Disposable HACS installation, upgrade and live
+PTV checks are recorded separately in the candidate checklist.
+
 ## Updating dependency locks
 
 Change `requirements-test.in` or `requirements-build.in` deliberately, then
