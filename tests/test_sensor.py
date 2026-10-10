@@ -273,16 +273,18 @@ async def test_departure_failure_and_recovery(
 @pytest.mark.parametrize(
     "error_type", [ClientConnectionError, ValueError, TimeoutError]
 )
-async def test_initial_setup_failure_is_safe(
+async def test_initial_timetable_failure_is_safe_and_independent(
     hass, config_entry_factory, ptv_responses, error_type, caplog
 ):
-    """Initial requests fail before coordinator creation and must also be safe."""
+    """An initial timetable outage leaves entities unavailable and allows alerts."""
     sensitive = f"{SYNTHETIC_API_KEY} ?devid=12345&signature=synthetic-signature"
     ptv_responses(DEPARTURE_PATH, exc=error_type(sensitive))
     entry = config_entry_factory()
     entry.add_to_hass(hass)
-    assert not await hass.config_entries.async_setup(entry.entry_id)
+    assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    assert entry.state is ConfigEntryState.SETUP_ERROR
-    assert entry.entry_id not in hass.data[DOMAIN]
+    assert entry.state is ConfigEntryState.LOADED
+    assert entry.entry_id in hass.data[DOMAIN]
+    for index in range(5):
+        assert hass.states.get(f"{ENTITY_PREFIX}_{index}").state == STATE_UNAVAILABLE
     assert f"PTV entry setup failed ({error_type.__name__})" in caplog.text

@@ -3,8 +3,9 @@
 This specification resolves [issue #2](https://github.com/davidbmck/public_transport_victoria/issues/2)
 under the [route alerts backlog](https://github.com/davidbmck/public_transport_victoria/issues/1).
 It defines the behaviour to implement in issues #3–#5 and test in #6. The API
-client implements the fetch and parsing contract below; the integration does
-not yet provide alert polling or sensors.
+client and shared coordinator implement fetching, parsing and polling below.
+The production alert sensor remains work item #5; entries without an enabled
+alert subscriber make no alert requests.
 
 `Connector.async_route_disruptions()` fetches the configured route independently
 of departure initialization and returns normalized, ordered, non-expired notice
@@ -17,7 +18,45 @@ URLs. Successful empty responses return `[]`.
 
 Parsing is separate from HTTP fetching. `non_expired_disruptions()` can
 re-evaluate a successful normalized snapshot against one aware reference instant
-when the later coordinator reuses it; this does not make a failed refresh healthy.
+when the coordinator reuses it; this does not make a failed refresh healthy.
+
+## Coordinator implementation
+
+Configuration-entry setup acquires a shared coordinator through
+`RouteAlertManager` and exposes it as `connector.alert_coordinator`. Ownership
+alone does not subscribe, request data or start polling. The manager uses the
+integer route ID and exact developer-ID/API-key pair as a private in-memory
+key. It releases the coordinator after the last owning entry unloads, including
+timers, shutdown registration and any in-flight request. Failed or cancelled
+platform setup also releases ownership. Home Assistant's HTTP session stays open.
+
+An enabled consumer uses `CoordinatorEntity` with its owning entry ID as
+`context`. After `super().async_added_to_hass()` registers its listener, it awaits
+`coordinator.async_ensure_fresh()`. This works with empty timetables and failed
+timetable setup. A disabled entity is not added by Home Assistant and does not
+subscribe. Removing the last listener stops periodic requests; ownership may
+remain so a re-enabled consumer can reuse a healthy, still-fresh snapshot.
+
+`async_ensure_fresh()` caches a successful empty response exactly like other
+responses, re-evaluates expiry on reuse and keeps the original successful-update
+timestamp. A snapshot at least ten minutes old, or one followed by a failure,
+requires a request. `async_request_refresh()` joins concurrent setup/manual or
+already-running periodic refreshes. Cancelling one waiting consumer does not
+cancel the shared request for others; unloading its last owner does cancel it.
+
+The coordinator starts with `data: []`, no successful-update timestamp and
+`last_update_success: false`. A failed refresh leaves last-good data and its
+timestamp unchanged while setting coordinator availability to false. Error
+messages contain only safe exception types and suppress raw request tracebacks.
+Home Assistant may omit custom entity attributes while unavailable; the retained
+snapshot and timestamp remain in the coordinator for recovery.
+
+Initial timetable failures now leave the entry loaded with unavailable departure
+entities and their existing retry/polling behaviour, allowing independent alert
+setup. Existing successful setup, departure identities, config-entry fields and
+polling intervals remain unchanged; no migration is required. The tests use a
+test-only consumer to verify availability through Home Assistant until #5 adds
+the public alert sensor.
 
 ## Entity and compatibility
 
