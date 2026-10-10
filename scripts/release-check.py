@@ -10,6 +10,7 @@ import io
 import json
 import logging
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -32,33 +33,74 @@ class PrivateLogs(logging.Handler):
     def __init__(self):
         super().__init__()
         self.records = []
+        self.record_locations = []
+        self.error_locations = []
 
     def emit(self, record):
         self.records.append(self.format(record))
+        self.record_locations.append(
+            {"logger": record.name, "line": record.lineno, "level": record.levelname}
+        )
+        if record.levelno >= logging.ERROR:
+            package = None
+            if (
+                record.name == "homeassistant.util.package"
+                and isinstance(record.args, tuple)
+                and record.args
+                and isinstance(record.args[0], str)
+                and re.fullmatch(r"[a-zA-Z0-9_.<>=!-]+", record.args[0])
+            ):
+                package = record.args[0]
+            self.error_locations.append(
+                {
+                    "logger": record.name,
+                    "line": record.lineno,
+                    "exception_type": type(record.exc_info[1]).__name__
+                    if record.exc_info
+                    else None,
+                    "package": package,
+                }
+            )
 
-    def check(self, credentials):
-        captured = "\n".join(self.records)
+    def check(self, credentials, strict=True):
         sensitive = [credentials.get("github_token"), "signature=", "devid="]
         if credentials.get("ptv"):
             sensitive.append(credentials["ptv"]["api_key"])
-        assert all(not value or value not in captured for value in sensitive), (
+        leaked = {
+            json.dumps(location, sort_keys=True)
+            for record, location in zip(
+                self.records, self.record_locations, strict=True
+            )
+            if any(value and value in record for value in sensitive)
+        }
+        if leaked:
+            print(
+                json.dumps(
+                    {
+                        "sensitive_log_locations": [
+                            json.loads(location) for location in sorted(leaked)
+                        ]
+                    }
+                ),
+                flush=True,
+            )
+        assert not strict or not leaked, (
             "Sensitive data found in captured logs (contents withheld)"
         )
 
 
 async def home_assistant(config_dir):
-    from homeassistant import config_entries, loader
+    from homeassistant import bootstrap, loader
     from homeassistant.core import HomeAssistant
-    from homeassistant.helpers import frame
-    from homeassistant.setup import async_setup_component
 
     hass = HomeAssistant(str(config_dir))
+    os.environ["UV_CACHE_DIR"] = str(config_dir / "uv-cache")
     loader.async_setup(hass)
-    frame.async_setup(hass)
-    hass.config_entries = config_entries.ConfigEntries(hass, {})
-    await hass.config_entries.async_initialize()
-    assert await async_setup_component(hass, "network", {})
-    await hass.config.async_set_time_zone("Australia/Melbourne")
+    await bootstrap.async_mount_local_lib_path(str(config_dir))
+    result = await bootstrap.async_from_config_dict(
+        {"homeassistant": {"time_zone": "Australia/Melbourne"}}, hass=hass
+    )
+    assert result is hass
     return hass
 
 
@@ -176,9 +218,20 @@ def identities(hass):
 
 async def verify_live(hass, credentials):
     """Bounded representative route requests; no saved responses or signed URLs."""
+    from homeassistant.helpers import entity_registry as er
+
     from custom_components.public_transport_victoria.PublicTransportVictoria import (
         public_transport_victoria as ptv_client,
     )
+
+    def alert_states():
+        states = [
+            hass.states.get(entity.entity_id)
+            for entity in er.async_get(hass).entities.values()
+            if entity.platform == DOMAIN and entity.unique_id.endswith("_route_alerts")
+        ]
+        assert len(states) == 2 and all(state is not None for state in states)
+        return states
 
     types = (await ptv_request(hass, credentials, "/v3/route_types"))["route_types"]
     samples = []
@@ -213,6 +266,10 @@ async def verify_live(hass, credentials):
     assert len(coordinators) == 2 and coordinators[0] is coordinators[1]
     coordinator = coordinators[0]
     assert coordinator.last_update_success
+    assert all(state.state == str(len(coordinator.data)) for state in alert_states())
+    assert all(
+        state.attributes["alerts"] == coordinator.data for state in alert_states()
+    )
     timestamp, notices = coordinator.last_successful_update, coordinator.data
     key = coordinator._connector.api_key
     coordinator._connector.api_key = "synthetic-invalid-key-for-release-check"
@@ -222,15 +279,24 @@ async def verify_live(hass, credentials):
         assert not coordinator.last_update_success
         assert coordinator.data == notices
         assert coordinator.last_successful_update == timestamp
+        assert all(state.state == "unavailable" for state in alert_states())
     finally:
         coordinator._connector.api_key = key
     await coordinator.async_refresh()
     await hass.async_block_till_done()
     assert coordinator.last_update_success
+    assert all(state.state == str(len(coordinator.data)) for state in alert_states())
     for entry in entries:
         assert await hass.config_entries.async_unload(entry.entry_id)
+    await hass.async_block_till_done()
+    assert coordinator._closed and not coordinator._owners
+    assert not coordinator._subscriptions
+    for entry in entries:
         assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
+    assert all(
+        state.state not in {"unknown", "unavailable"} for state in alert_states()
+    )
     return samples
 
 
@@ -251,12 +317,25 @@ async def phase(name, config_dir, ref, credentials):
             return
         if name == "baseline":
             await add_existing_entries(hass, credentials["ptv"])
+            from homeassistant.helpers import entity_registry as er
+
+            first = next(iter(identities(hass)))
+            er.async_get(hass).async_update_entity(
+                first,
+                new_entity_id="sensor.ptv_release_preserved_departure",
+                name="Disposable preserved name",
+            )
+            await hass.async_block_till_done()
             before = identities(hass)
             assert len(before) == 10
             (config_dir / "departure-identities.json").write_text(json.dumps(before))
         else:
+            from homeassistant.config_entries import ConfigEntryState
+
             for entry in hass.config_entries.async_entries(DOMAIN):
-                assert await hass.config_entries.async_setup(entry.entry_id)
+                if entry.state is not ConfigEntryState.LOADED:
+                    assert await hass.config_entries.async_setup(entry.entry_id)
+                assert entry.version == 1
             await hass.async_block_till_done()
             before = json.loads((config_dir / "departure-identities.json").read_text())
             assert identities(hass) == before, (
@@ -267,6 +346,20 @@ async def phase(name, config_dir, ref, credentials):
             integration = await async_get_integration(hass, DOMAIN)
             assert integration.version == EXPECTED_VERSION
             assert str(integration.file_path).startswith(str(config_dir))
+
+            def installed_source():
+                return {
+                    str(path.relative_to(integration.file_path)): hashlib.sha256(
+                        path.read_bytes()
+                    ).hexdigest()
+                    for path in integration.file_path.rglob("*")
+                    if path.is_file()
+                }
+
+            assert (
+                await hass.async_add_executor_job(installed_source)
+                == credentials["expected_source"]
+            ), "HACS source differs from candidate checkout"
             samples = await verify_live(hass, credentials["ptv"])
             assert identities(hass) == before
             print(
@@ -309,9 +402,17 @@ def main():
     logging.basicConfig(level=logging.DEBUG, handlers=[logs], force=True)
     if len(sys.argv) == 4:
         asyncio.run(phase(sys.argv[1], Path(sys.argv[2]), sys.argv[3], credentials))
-        logs.check(credentials)
+        # Source-install phases may boot the inherited 0.7 code before replacing
+        # it. Only the restarted candidate establishes release log acceptance.
+        logs.check(credentials, strict=sys.argv[1] == "candidate")
         return
     ref = sys.argv[1]
+    source_dir = Path.cwd() / "custom_components" / DOMAIN
+    credentials["expected_source"] = {
+        str(path.relative_to(source_dir)): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in source_dir.rglob("*")
+        if path.is_file()
+    }
     install_only = credentials.get("install_only", False)
     assert install_only or credentials.get("ptv"), (
         "Live PTV credentials are required for release acceptance"
@@ -334,6 +435,11 @@ def main():
                     ref,
                 ],
                 input=json.dumps(credentials),
+                env={
+                    **os.environ,
+                    "PYTHONUSERBASE": str(config_dir / "deps"),
+                    "UV_CACHE_DIR": str(config_dir / "uv-cache"),
+                },
                 text=True,
                 capture_output=True,
                 timeout=300,
@@ -356,6 +462,11 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as error:
+        for handler in logging.getLogger().handlers:
+            if isinstance(handler, PrivateLogs):
+                print(
+                    json.dumps({"error_locations": handler.error_locations}), flush=True
+                )
         location = traceback.extract_tb(error.__traceback__)[-1]
         print(
             f"Release check failed ({type(error).__name__}) at "
