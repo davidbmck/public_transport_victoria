@@ -158,6 +158,22 @@ outside this harness.
 
 ## Coverage ownership
 
+Issue #21 adds `tests/test_departure_summary.py`: effective-time selection,
+identity/sentinel rules, duplicate and simultaneous services, malformed records,
+all transport modes, local expiry without new HTTP requests, HTTP/network/payload
+failure and throttled retry, independent alerts, recovery, unload/reload and
+registry customisations. Existing departure regressions retain their original
+identity, attribute, timezone and polling assertions, with the expected entity
+count increased for the two additive summary sensors.
+
+On 13 October 2026, the issue #21 checkout passed `sh scripts/test-container.sh`:
+Ruff lint/format checks and all **231 behavioural tests** on the pinned Python
+3.14.7 / HA 2026.9.4 Linux amd64 environment. All four cleanup regression checks
+passed, and the task containers, images and builders were verified absent. The
+pinned official hassfest check listed above also passed with zero invalid
+integrations. Summary-sensor live API and installation/release trials remain
+unverified; no production deployment or version bump is part of this change.
+
 | Work item | Required additional behavioural checks |
 | --- | --- |
 | #3 API client | Covered by `tests/test_route_disruptions.py`, including every case in `tests/fixtures/route_alerts/cases.json`; extend these checks if the client contract changes. |

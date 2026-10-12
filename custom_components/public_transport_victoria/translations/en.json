@@ -1,6 +1,12 @@
 {
     "entity": {
         "sensor": {
+            "next_departure": {
+                "name": "{route_name} line to {direction_name} from {stop_name} next departure"
+            },
+            "following_departure": {
+                "name": "{route_name} line to {direction_name} from {stop_name} following departure"
+            },
             "route_alerts": {
                 "name": "{route_name} line to {direction_name} from {stop_name} alerts"
             }

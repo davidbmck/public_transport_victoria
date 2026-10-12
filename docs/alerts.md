@@ -9,7 +9,8 @@ PTV data retains the integration's Creative Commons Attribution 4.0 attribution.
 
 ## Find the sensor
 
-Each configuration entry has five existing departure sensors and one additional
+Each configuration entry has five existing departure sensors, two
+[departure summary sensors](departure-summaries.md), and one additional
 alert sensor, named `<route_name> line to <direction_name> from <stop_name> alerts`
 in English. Find it under the entry in **Settings → Devices & services**, then
 copy its actual entity ID. The examples use `sensor.example_route_alerts` as a

@@ -68,7 +68,7 @@ async def test_existing_entry_departures(
 
     registry = er.async_get(hass)
     entities = er.async_entries_for_config_entry(registry, entry.entry_id)
-    assert len(entities) == 6
+    assert len(entities) == 8
     for index in range(5):
         entity_id = f"{ENTITY_PREFIX}_{index}"
         expected_name = (
@@ -120,12 +120,12 @@ async def test_two_directions_on_one_route(
     first = [
         e
         for e in er.async_entries_for_config_entry(registry, outbound.entry_id)
-        if not e.unique_id.endswith("_route_alerts")
+        if not e.unique_id.startswith(f"{DOMAIN}_")
     ]
     second = [
         e
         for e in er.async_entries_for_config_entry(registry, inbound.entry_id)
-        if not e.unique_id.endswith("_route_alerts")
+        if not e.unique_id.startswith(f"{DOMAIN}_")
     ]
     assert len(first) == len(second) == 5
     assert {e.entity_id for e in first}.isdisjoint(e.entity_id for e in second)
