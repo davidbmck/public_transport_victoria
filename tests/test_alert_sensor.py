@@ -51,7 +51,7 @@ async def test_upgrade_adds_enabled_alert_sensor_and_preserves_departure_registr
     ptv_responses(ALERT_PATH, {"disruptions": {"general": notices}})
     await setup_entry(hass, entry)
     registry = er.async_get(hass)
-    assert len(er.async_entries_for_config_entry(registry, entry.entry_id)) == 6
+    assert len(er.async_entries_for_config_entry(registry, entry.entry_id)) == 8
     for original in departures:
         current = registry.async_get(original.entity_id)
         assert (current.id, current.unique_id) == (original.id, original.unique_id)

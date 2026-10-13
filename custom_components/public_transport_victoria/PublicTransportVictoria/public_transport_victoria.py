@@ -10,6 +10,7 @@ from homeassistant.util import Throttle
 from homeassistant.util.dt import get_time_zone
 
 from .route_disruptions import RouteDisruptionsError, parse_route_disruptions
+from ..departure_summary import parse_departure_time, service_identity
 
 
 BASE_URL = "https://timetableapi.ptv.vic.gov.au"
@@ -45,6 +46,7 @@ class Connector:
         self.route_name = route_name
         self.direction_name = direction_name
         self.stop_name = stop_name
+        self.departure_fetch_failed = False
 
     async def _init(self):
         """Async Init Public Transport Victoria connector."""
@@ -167,34 +169,53 @@ class Connector:
 
             return stops
 
-    @Throttle(MIN_TIME_BETWEEN_UPDATES)
     async def async_update(self):
         """Update the departure information."""
+        await self._async_update_departures()
+        # A throttled retry after an unsuccessful fetch is still a failure.
+        if self.departure_fetch_failed:
+            raise ValueError("PTV timetable has no successful refresh")
+
+    @Throttle(MIN_TIME_BETWEEN_UPDATES)
+    async def _async_update_departures(self):
+        """Publish a complete successful snapshot, retaining failures explicitly."""
+        self.departure_fetch_failed = True
         url = build_URL(self.id, self.api_key, self.departures_path)
 
-        async with aiohttp.ClientSession() as session:
-            response = await session.get(url)
+        session = async_get_clientsession(self.hass)
+        async with session.get(url, timeout=DISRUPTIONS_TIMEOUT) as response:
+            response.raise_for_status()
+            if response.status != 200:
+                raise ValueError("Unexpected timetable HTTP status")
+            payload = await response.json()
+        if (
+            not isinstance(payload, dict)
+            or not isinstance(payload.get("departures"), list)
+        ):
+            raise ValueError("Malformed timetable response")
+        departures = [dict(r) for r in payload["departures"] if isinstance(r, dict)]
 
-        if response is not None and response.status == 200:
-            response = await response.json()
-            departures = response["departures"]
+        async def run_info(record):
+            run_id = record.get("run_id")
+            if service_identity({"run_id": run_id}) is not None:
+                return await self.async_run(run_id)
+            return None
 
-            run_infos = await asyncio.gather(
-                *[self.async_run(r["run_id"]) for r in departures]
+        run_infos = await asyncio.gather(*[run_info(r) for r in departures])
+        for r, info in zip(departures, run_infos):
+            timestamp = (
+                parse_departure_time(r.get("estimated_departure_utc"))
+                or parse_departure_time(r.get("scheduled_departure_utc"))
             )
-
-            self.departures = []
-            for r, run_info in zip(departures, run_infos):
-                if r["estimated_departure_utc"] is not None:
-                    r["departure"] = convert_utc_to_local(
-                        r["estimated_departure_utc"], self.hass
-                        )
-                else:
-                    r["departure"] = convert_utc_to_local(
-                        r["scheduled_departure_utc"], self.hass
-                        )
-                r["is_express"] = run_info.get("express_stop_count", 0) > 0 if run_info else False
-                self.departures.append(r)
+            r["departure"] = (
+                timestamp.astimezone(
+                    get_time_zone(self.hass.config.time_zone)
+                ).strftime("%I:%M %p")
+                if timestamp else "No data"
+            )
+            r["is_express"] = info.get("express_stop_count", 0) > 0 if info else False
+        self.departures = departures
+        self.departure_fetch_failed = False
 
 
     async def async_run(self, run_id):

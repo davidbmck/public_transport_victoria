@@ -12,6 +12,10 @@ from homeassistant.helpers.update_coordinator import (
 from homeassistant.const import ATTR_ATTRIBUTION
 from .const import ATTRIBUTION, DOMAIN
 from .alert_sensor import PublicTransportVictoriaAlertSensor
+from .summary_sensor import (
+    DepartureSummaryCoordinator,
+    PublicTransportVictoriaSummarySensor,
+)
 
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = datetime.timedelta(minutes=10)
@@ -34,6 +38,11 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     new_devices = [PublicTransportVictoriaSensor(coordinator, i) for i in range(5)]
     new_devices.append(
         PublicTransportVictoriaAlertSensor(connector.alert_coordinator, config_entry)
+    )
+    summaries = DepartureSummaryCoordinator(hass, coordinator, config_entry)
+    new_devices.extend(
+        PublicTransportVictoriaSummarySensor(summaries, config_entry, i)
+        for i in range(2)
     )
 
     async_add_entities(new_devices)
