@@ -31,8 +31,27 @@ inherited source is not relicensed. Original attribution and
 
 The release candidate uses manifest/tag `0.9.0`. PR #22 passed the offline
 231-test suite, official hassfest, and GitHub behavioural/HACS workflows before
-merge. Candidate validation and packaging results are recorded here before
-publication.
+merge. On 13 October 2026, the 0.9.0 candidate also passed:
+
+- All **231 behavioural tests** and Ruff lint/format checks in the pinned Python
+  3.14.7 / Home Assistant 2026.9.4 Linux amd64 test environment.
+- All four cleanup error-handling checks.
+- Official hassfest: one integration, zero invalid integrations.
+- Real HACS 2.0.5 installation of published `0.8.0` and upgrade to candidate
+  `a5135337d583829feed3274011d1a7f049ed0880` on official HA 2026.9.4, with
+  mocked PTV responses. All **12 existing registry records**, including ten
+  departure identities and the customised departure name/ID, were preserved.
+  Four new timestamp summaries were available after restart and unload/reload;
+  alert authentication failure/recovery and successful empty feeds passed.
+- Installed integration source matched the candidate checkout byte-for-byte.
+- Archive integrity, deterministic rebuild and rejection of a mismatched tag.
+  The 16-file archive SHA-256 is
+  `6819ba219ff30bee8cbf149d6eb82f11bb298bbc6fe1e4ade1e39db72f06c20b`.
+
+Task test/installation containers, images and builders were removed and absence
+was verified. GitHub workflow and final source commit results are included in
+the published release notes; the archive is rebuilt from the merged release
+commit before publication.
 
 The disposable upgrade trial uses official Home Assistant 2026.9.4 and HACS
 2.0.5. It installs this fork's published `0.8.0` baseline through HACS, creates
