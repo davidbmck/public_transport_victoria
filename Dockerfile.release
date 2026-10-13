@@ -7,4 +7,5 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /workspace
 COPY custom_components/public_transport_victoria ./custom_components/public_transport_victoria
 COPY scripts/release-check.py ./scripts/release-check.py
+COPY scripts/release_ptv_fixtures.py ./scripts/release_ptv_fixtures.py
 ENTRYPOINT ["python", "scripts/release-check.py"]
