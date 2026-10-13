@@ -14,6 +14,7 @@
 !docs/alerts.md
 !scripts/
 !scripts/release-check.py
+!scripts/release_ptv_fixtures.py
 **/__pycache__/
 **/*.pyc
 **/.pytest_cache/

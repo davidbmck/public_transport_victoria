@@ -24,7 +24,14 @@ UPSTREAM = "bremor/public_transport_victoria"
 FORK = "davidbmck/public_transport_victoria"
 HACS_VERSION = "2.0.5"
 HACS_SHA256 = "97be6b824a4f38e683728cc6dd72367f6b8bad0a43428b1b3b987a3087adf413"
-EXPECTED_VERSION = "0.8.0"
+EXPECTED_VERSION = json.loads(
+    (
+        Path(__file__).resolve().parent.parent
+        / "custom_components"
+        / DOMAIN
+        / "manifest.json"
+    ).read_text()
+)["version"]
 
 
 class PrivateLogs(logging.Handler):
@@ -212,7 +219,10 @@ def identities(hass):
     return {
         entity.entity_id: [entity.unique_id, entity.config_entry_id, entity.name]
         for entity in registry.entities.values()
-        if entity.platform == DOMAIN and not entity.unique_id.endswith("_route_alerts")
+        if entity.platform == DOMAIN
+        and not entity.unique_id.endswith(
+            ("_route_alerts", "_next_departure", "_following_departure")
+        )
     }
 
 
@@ -301,17 +311,24 @@ async def verify_live(hass, credentials):
 
 
 async def phase(name, config_dir, ref, credentials):
+    if credentials.get("mock_ptv"):
+        from release_ptv_fixtures import install_mocks
+
+        install_mocks(credentials["ptv"])
     os.chdir(config_dir)
     hass = await home_assistant(config_dir)
     try:
         if name.startswith("install"):
-            repository = UPSTREAM if name == "install-baseline" else FORK
-            target_ref = "master" if name == "install-baseline" else ref
+            baseline = credentials.get(
+                "baseline", {"repository": UPSTREAM, "ref": "master", "version": "0.7"}
+            )
+            repository = baseline["repository"] if name == "install-baseline" else FORK
+            target_ref = baseline["ref"] if name == "install-baseline" else ref
             version = await install(
                 hass, repository, target_ref, credentials.get("github_token")
             )
             assert version == (
-                "0.7" if name == "install-baseline" else EXPECTED_VERSION
+                baseline["version"] if name == "install-baseline" else EXPECTED_VERSION
             )
             print(json.dumps({"phase": name, "installed_version": version}))
             return
@@ -329,6 +346,17 @@ async def phase(name, config_dir, ref, credentials):
             before = identities(hass)
             assert len(before) == 10
             (config_dir / "departure-identities.json").write_text(json.dumps(before))
+            existing = {
+                entity.entity_id: [
+                    entity.id,
+                    entity.unique_id,
+                    entity.config_entry_id,
+                    entity.name,
+                ]
+                for entity in er.async_get(hass).entities.values()
+                if entity.platform == DOMAIN
+            }
+            (config_dir / "existing-identities.json").write_text(json.dumps(existing))
         else:
             from homeassistant.config_entries import ConfigEntryState
 
@@ -341,6 +369,19 @@ async def phase(name, config_dir, ref, credentials):
             assert identities(hass) == before, (
                 "Departure registry identities changed on upgrade"
             )
+            from homeassistant.helpers import entity_registry as er
+
+            existing = json.loads((config_dir / "existing-identities.json").read_text())
+            registry = er.async_get(hass)
+            for entity_id, expected in existing.items():
+                current = registry.async_get(entity_id)
+                assert current is not None
+                assert [
+                    current.id,
+                    current.unique_id,
+                    current.config_entry_id,
+                    current.name,
+                ] == expected
             from homeassistant.loader import async_get_integration
 
             integration = await async_get_integration(hass, DOMAIN)
@@ -362,11 +403,34 @@ async def phase(name, config_dir, ref, credentials):
             ), "HACS source differs from candidate checkout"
             samples = await verify_live(hass, credentials["ptv"])
             assert identities(hass) == before
+            summaries = [
+                hass.states.get(entity.entity_id)
+                for entity in registry.entities.values()
+                if entity.platform == DOMAIN
+                and entity.unique_id.endswith(
+                    ("_next_departure", "_following_departure")
+                )
+            ]
+            assert len(summaries) == 4
+            assert all(state is not None for state in summaries)
+            if credentials.get("mock_ptv"):
+                from homeassistant.util import dt as dt_util
+
+                assert all(
+                    state.attributes["device_class"] == "timestamp"
+                    and dt_util.parse_datetime(state.state) > dt_util.utcnow()
+                    and state.attributes["service_reference"]
+                    in {"synthetic-a", "synthetic-b"}
+                    for state in summaries
+                )
             print(
                 json.dumps(
                     {
                         "phase": name,
                         "departure_identities": len(before),
+                        "existing_registry_records": len(existing),
+                        "summary_sensors": len(summaries),
+                        "ptv_api": "mocked" if credentials.get("mock_ptv") else "live",
                         "samples": samples,
                     }
                 )
@@ -398,6 +462,11 @@ async def download_hacs(config_dir):
 
 def main():
     credentials = json.load(sys.stdin)
+    if credentials.get("mock_ptv"):
+        credentials["ptv"] = {
+            "id": "12345",
+            "api_key": "synthetic-release-key-not-a-credential",
+        }
     logs = PrivateLogs()
     logging.basicConfig(level=logging.DEBUG, handlers=[logs], force=True)
     if len(sys.argv) == 4:
